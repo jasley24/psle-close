@@ -567,7 +567,23 @@ async function generateQuiz() {
     const raw=data.content.map(i=>i.text||'').join('').trim();
     const clean=raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
     let parsed;
-    try{ parsed=JSON.parse(clean); }catch(e){ throw new Error(`Malformed JSON from AI. Try again. (${e.message})`); }
+    try{
+      // Remove bad control characters (literal newlines/tabs inside JSON strings)
+      const sanitised = clean
+        .replace(/\r/g, '')
+        .replace(/([^\\])\n/g, '$1\\n')
+        .replace(/([^\\])\t/g, '$1\\t')
+        .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+      parsed=JSON.parse(sanitised);
+    }catch(e){
+      // Second attempt: more aggressive - replace all unescaped control chars
+      try{
+        const aggressive = clean.replace(/[\x00-\x1F\x7F]/g, ' ');
+        parsed=JSON.parse(aggressive);
+      }catch(e2){
+        throw new Error(`Malformed JSON from AI. Try again. (${e.message})`);
+      }
+    }
     quizData=parsed;
     renderQuiz();
   } catch(err){
