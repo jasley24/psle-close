@@ -461,8 +461,8 @@ function showScreen(id) {
 
 function submitFirebaseUrl() {
   const val = document.getElementById('firebase-url-input').value.trim();
-  if (!val.includes('firebaseio.com')) {
-    document.getElementById('firebase-url-error').textContent = 'URL should contain firebaseio.com — see steps above.';
+  if (!val.includes('firebaseio.com') && !val.includes('firebasedatabase.app')) {
+    document.getElementById('firebase-url-error').textContent = 'URL should contain firebaseio.com or firebasedatabase.app — see steps above.';
     return;
   }
   saveFirebaseUrl(val);
