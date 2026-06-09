@@ -497,68 +497,85 @@ function selectPlayer(name) {
   if(n) n.style.display='none';
 }
 function buildPrompt(compId, topic) {
-  const prompts={
+  const p = {
     'grammar-mcq': `You are a Singapore PSLE English Paper 2 examiner. Create 10 Grammar MCQ questions on the topic: "${topic}".
 
-CRITICAL VARIETY: Each question tests a DIFFERENT grammar point in this exact order:
-Q1:Subject-verb agreement, Q2:Past perfect tense, Q3:Question tag, Q4:Passive voice, Q5:Reported speech, Q6:Gerund or infinitive, Q7:Modal verb, Q8:Relative pronoun (who/which/whose), Q9:Article (a/an/the), Q10:Preposition.
-All 10 sentences must be completely different in structure and content. Options are plain words/phrases only — do NOT prefix with A/B/C/D. P5/P6 difficulty.
+CRITICAL VARIETY: Each question tests a DIFFERENT grammar point in this EXACT order:
+Q1:Subject-verb agreement, Q2:Past perfect tense, Q3:Question tag, Q4:Passive voice, Q5:Reported speech, Q6:Gerund or infinitive, Q7:Modal verb, Q8:Relative pronoun who/which/whose, Q9:Article a/an/the, Q10:Preposition.
+Each sentence must be completely different in structure. Options are plain words/phrases only - do NOT prefix with A B C D. PSLE P5/P6 difficulty.
 
-Return ONLY this JSON (no markdown):
-{"title":"${topic}","questions":[{"n":1,"sentence":"Sentence with ___ blank.","opti'vocab-mcq': `You are a Singapore PSLE English Paper 2 examiner. Create 5 Vocabulary MCQ questions on the topic: "${topic}".
+Return ONLY this JSON no markdown:
+{"title":"Grammar MCQ","questions":[{"n":1,"sentence":"Sentence with ___ blank.","options":["opt1","opt2","opt3","opt4"],"answer":0,"type":"SVA","explanation":"Reason in 15 words."}]}
+All 10 required. answer is 0-indexed.`,
 
-CRITICAL: Each question tests a COMPLETELY DIFFERENT word type. Use exactly: Q1:precise action verb, Q2:descriptive adjective, Q3:phrasal verb in context, Q4:word with multiple meanings, Q5:formal/academic noun.
-Options are plausible near-synonyms — do NOT prefix with A/B/C/D. P5/P6 level.
+    'vocab-mcq': `You are a Singapore PSLE English Paper 2 examiner. Create 5 Vocabulary MCQ questions on the topic: "${topic}".
 
-Return ONLY this JSON (no markdown):
-{"title":"${topic}","questions":[{"n":1,"sentence":"Sentence with ___ blank.","options":["opt1","opt2","opt3","opt4"],"answer":0,"type":"action-verb","explanation":"Reason in 20 words."}]}
-All 5 required. answer is 0-indexed.`,":"vocabulary","explanation":"Why A is correct in this context."}]}
-All 5 questions required. answer is 0-indexed. explanation max 25 words.`,
+CRITICAL: Each question tests a COMPLETELY DIFFERENT word. Use exactly: Q1:precise action verb, Q2:descriptive adjective, Q3:phrasal verb in context, Q4:word with multiple meanings, Q5:formal noun.
+Options are plausible near-synonyms - do NOT prefix with A B C D. P5/P6 level.
+
+Return ONLY this JSON no markdown:
+{"title":"Vocabulary MCQ","questions":[{"n":1,"sentence":"Sentence with ___ blank.","options":["opt1","opt2","opt3","opt4"],"answer":0,"type":"action-verb","explanation":"Reason in 20 words."}]}
+All 5 required. answer is 0-indexed.`,
+
     'vocab-cloze': `You are a Singapore PSLE English Paper 2 examiner. Create a Vocabulary Cloze passage on: "${topic}".
-Write a passage (~100 words) with 5 blanks numbered [1] to [5].
-For each blank, provide 4 options (A-D) where exactly one fits best in context.
-Test vocabulary knowledge in context. P5/P6 level.
-Return ONLY this JSON:
-{"title":"${topic}","passage":"Passage text with (1), (2), (3), (4), (5) blanks.","questions":[{"n":1,"options":["A word","B word","C word","D word"],"answer":0,"explanation":"Why A fits best here."}]}
+
+Write a passage about 100 words with 5 blanks numbered (1) to (5).
+For each blank provide 4 options where exactly one fits best in context.
+Test vocabulary knowledge in context. P5/P6 level. Options do NOT start with A B C D.
+
+Return ONLY this JSON no markdown:
+{"title":"Vocabulary Cloze","passage":"Passage text with (1), (2), (3), (4), (5) blanks.","questions":[{"n":1,"options":["opt1","opt2","opt3","opt4"],"answer":0,"explanation":"Why this fits."}]}
 All 5 questions required. answer is 0-indexed.`,
+
     'grammar-cloze': `You are a Singapore PSLE English Paper 2 examiner. Create a Grammar Cloze on: "${topic}".
-Write a passage (~150 words) with 10 blanks [BLANK_1] to [BLANK_10].
-Provide a word bank of 12 words (10 correct + 2 distractors). Each blank needs exactly one word from the bank.
+
+Write a passage about 150 words with 10 blanks [BLANK_1] to [BLANK_10].
+Provide a word bank of exactly 12 words: 10 answers plus 2 distractors. Each blank needs exactly one word from the bank.
 Test grammar: tenses, prepositions, conjunctions, pronouns, articles. P5/P6 level.
-CRITICAL: passage paragraphs separated by \\n\\n, no line breaks within paragraphs.
-Return ONLY this JSON:
-{"title":"${topic}","passage":"Para1 [BLANK_1] text [BLANK_2].\\n\\nPara2 [BLANK_3].","wordbank":["word1","word2","word3","word4","word5","word6","word7","word8","word9","word10","extra1","extra2"],"answers":["ans1","ans2","ans3","ans4","ans5","ans6","ans7","ans8","ans9","ans10"],"types":["prep","conj","tense","pronoun","article","verb","prep","conj","noun","adj"],"explanations":["clue1","clue2","clue3","clue4","clue5","clue6","clue7","clue8","clue9","clue10"]}
-wordbank has 12 words. answers has 10 words (each must be in wordbank). explanations max 10 words each.`,
+CRITICAL FORMAT: 4 paragraphs separated by \n\n, NO line breaks within a paragraph.
+
+Return ONLY this JSON no markdown:
+{"title":"Grammar Cloze","passage":"Para1 [BLANK_1] text [BLANK_2].\n\nPara2 [BLANK_3].","wordbank":["w1","w2","w3","w4","w5","w6","w7","w8","w9","w10","extra1","extra2"],"answers":["a1","a2","a3","a4","a5","a6","a7","a8","a9","a10"],"types":["prep","conj","tense","pronoun","article","verb","prep","conj","noun","adj"],"explanations":["c1","c2","c3","c4","c5","c6","c7","c8","c9","c10"]}
+wordbank has exactly 12 words. answers has exactly 10 words each in wordbank. explanations max 10 words each.`,
+
     'editing': `You are a Singapore PSLE English Paper 2 examiner. Create an Editing passage on: "${topic}".
-Write a passage (~150 words) with exactly 10 underlined words marked (1) to (10).
-Of the 10: exactly 5 contain errors (grammar OR spelling), exactly 5 are already correct.
-Errors: subject-verb agreement, wrong tense, wrong word form, spelling mistakes (P5/P6 level).
-Correct answers for errors: single-word replacement. Correct words: write "correct" as the answer.
-CRITICAL: passage paragraphs separated by \\n\\n, no line breaks within paragraphs.
-Return ONLY this JSON:
-{"title":"${topic}","passage":"Text with (1)word1 and (2)word2 in sentences.\\n\\nMore text with (3)word3.","words":["word1","word2","word3","word4","word5","word6","word7","word8","word9","word10"],"answers":["correction_or_correct","correction_or_correct","correct","correction_or_correct","correct","correct","correction_or_correct","correction_or_correct","correct","correction_or_correct"],"types":["spelling","SVA","correct","tense","correct","correct","word-form","spelling","correct","tense"],"explanations":["brief reason","brief reason","already correct","brief reason","already correct","already correct","brief reason","brief reason","already correct","brief reason"]}
-answers: if error write correction; if already correct write "correct". explanations max 10 words.`,
+
+Write a passage about 150 words with exactly 10 underlined words marked (1) to (10) inline like this: The (1)children was playing.
+Of the 10: exactly 5 have errors (grammar OR spelling), exactly 5 are already correct.
+Error types: subject-verb agreement, wrong tense, wrong word form, misspelling.
+CRITICAL FORMAT: 4 paragraphs separated by \n\n, NO line breaks within paragraphs. Mark words as (N)word directly in text.
+
+Return ONLY this JSON no markdown:
+{"title":"Editing","passage":"Para1 with (1)word1 and (2)word2.\n\nPara2 with (3)word3.","words":["word1","word2","word3","word4","word5","word6","word7","word8","word9","word10"],"answers":["correction","correct","correction","correct","correct","correction","correction","correct","correction","correct"],"types":["SVA","correct","tense","correct","correct","word-form","spelling","correct","tense","correct"],"explanations":["reason","already correct","reason","already correct","already correct","reason","reason","already correct","reason","already correct"]}
+answers: write correction if wrong, write "correct" if already correct. explanations max 10 words.`,
+
     'comprehension': `You are a Singapore MOE primary school English teacher writing a PSLE Paper 2 Comprehension Cloze.
+
 TOPIC: ${topic}
+
 RULES:
-1. Non-fiction informational text, P5/P6 level, 4 paragraphs, ~200 words when blanks are filled.
+1. Non-fiction informational text, P5/P6 level, 4 paragraphs, about 200 words when blanks are filled.
 2. Exactly 15 blanks [BLANK_1] to [BLANK_15], at least 3 per paragraph.
 3. Each blank = EXACTLY ONE WORD. No phrases, hyphens, contractions.
-4. Types: ~5 verbs, ~3 prepositions, ~3 collocations, ~2 conjunctions, ~2 nouns/adjectives.
-5. For each blank: best answer + equally valid single-word alternatives. Max 10-word explanations.
-6. CRITICAL: 4 paragraphs separated by \\n\\n, NO line breaks within a paragraph.
-Return ONLY this JSON:
-{"title":"...","passage":"para1 [BLANK_1] text.\\n\\npara2 [BLANK_3].\\n\\npara3.\\n\\npara4.","blanks":[{"n":1,"p":"word","a":["word","alt"],"t":"verb","e":"clue"}]}
+4. Types: about 5 verbs, 3 prepositions, 3 collocations, 2 conjunctions, 2 nouns or adjectives.
+5. For each blank: best answer plus equally valid single-word alternatives. Max 10-word explanations.
+6. CRITICAL: 4 paragraphs separated by \n\n, NO line breaks within a paragraph.
+
+Return ONLY this JSON no markdown:
+{"title":"Passage title","passage":"para1 [BLANK_1] text.\n\npara2 [BLANK_3].\n\npara3.\n\npara4.","blanks":[{"n":1,"p":"word","a":["word","alt"],"t":"verb","e":"clue"}]}
 All 15 blanks required.`,
-    'synthesis': `You are a Singapore PSLE English Paper 2 examiner. Create 5 Synthesis & Transformation questions on: "${topic}".
-Each question: give 1 or 2 sentences + a stem/instruction. Student completes the transformation.
-Cover varied patterns matching the topic: passive voice, reported speech, although/unless/so-that/too-to, relative clauses, word transformation, not only...but also, comparatives, because/since, after/before/when, despite/in spite of.
-Each question worth 2 marks. P5/P6 difficulty.
-Return ONLY this JSON:
-{"title":"${topic}","questions":[{"n":1,"type":"passive","sentences":["The teacher praised the students."],"instruction":"Rewrite in passive voice.","stem":"The students ___","answer":"were praised by the teacher.","alternatives":[],"explanation":"Object becomes subject; was/were + past participle + by."}]}
-All 5 questions required. answer is the COMPLETION of the stem (what goes in the blank). alternatives: other accepted completions. explanation max 25 words.`,
+
+    'synthesis': `You are a Singapore PSLE English Paper 2 examiner. Create 5 Synthesis and Transformation questions on: "${topic}".
+
+Each question: give 1 or 2 sentences plus a stem and instruction. Student completes the transformation.
+Cover varied patterns: passive voice, reported speech, although/unless/so-that/too-to, relative clauses, word transformation, not only but also, comparatives, because/since, after/before/when, despite.
+Each question worth 2 marks. P5/P6 difficulty. Use 5 different pattern types across the 5 questions.
+
+Return ONLY this JSON no markdown:
+{"title":"Synthesis","questions":[{"n":1,"type":"passive","sentences":["The teacher praised the students."],"instruction":"Rewrite in passive voice.","stem":"The students ___","answer":"were praised by the teacher.","alternatives":[],"explanation":"Object becomes subject. was/were plus past participle plus by."}]}
+All 5 questions required. answer is the completion of the stem. explanation max 25 words.`
   };
-  return prompts[compId];
+  return p[compId] || '';
 }
 async function generateQuiz() {
   if (!currentPlayer) {
