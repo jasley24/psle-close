@@ -421,9 +421,10 @@ RULES:
 3. Each blank = EXACTLY ONE WORD (no phrases, no hyphens, no contractions).
 4. Blank types: ~5 verbs, ~3 prepositions, ~3 collocations (single key word), ~2 conjunctions, ~2 nouns/adjectives. Avoid trivial words like "a", "the", "is".
 5. For each blank provide: the best single-word answer AND any other single words that are equally correct (synonyms, valid grammar alternatives). Keep explanations to 10 words max.
+6. CRITICAL FORMAT: Write the passage value as a single JSON string. Separate the 4 paragraphs with \\n\\n. Do NOT put any line break or \\n inside a paragraph — each paragraph must be one continuous unbroken line of text even when it contains [BLANK_N] markers.
 
 Return ONLY this JSON (no markdown, no extra text):
-{"title":"...","passage":"...with [BLANK_1] through [BLANK_15]...","blanks":[{"n":1,"p":"word","a":["word","alt1"],"t":"verb","e":"short clue"},{"n":2,"p":"word","a":["word"],"t":"preposition","e":"short clue"}]}
+{"title":"...","passage":"paragraph one text [BLANK_1] more text [BLANK_2] end.\\n\\nparagraph two text [BLANK_3] more [BLANK_4] end.\\n\\nparagraph three.\\n\\nparagraph four.","blanks":[{"n":1,"p":"word","a":["word","alt1"],"t":"verb","e":"short clue"},{"n":2,"p":"word","a":["word"],"t":"preposition","e":"short clue"}]}
 
 All 15 blank objects required. "a" array must always include "p". All values in "a" must be single words.`;
 }
@@ -588,11 +589,14 @@ function renderQuiz() {
       </span>`
     );
   }
-  // Split passage into paragraphs robustly (handles \n\n or \n)
+  // Split passage into paragraphs robustly
+  // 1. Normalise Windows line endings
+  // 2. Split ONLY on double newlines (real paragraph breaks)
+  // 3. Within each paragraph, replace single newlines with a space so blanks don't float on their own line
   const paras = html
-    .split(/\n{2,}/)                          // try double-newline first
-    .flatMap(chunk => chunk.split(/\n/))      // then single newlines
-    .map(p => p.trim())
+    .replace(/\r\n/g, '\n')
+    .split(/\n{2,}/)
+    .map(p => p.replace(/\n/g, ' ').trim())
     .filter(p => p.length > 0)
     .map(p => `<p>${p}</p>`)
     .join('');
