@@ -139,6 +139,33 @@
   <span class="badge">PSLE Prep · v3</span>
 </header>
 
+<!-- API Key Setup Screen -->
+<div id="api-setup" style="display:none">
+  <div style="max-width:480px;margin:60px auto;padding:0 20px;">
+    <div style="background:white;border:1px solid var(--border);border-radius:14px;padding:32px 28px;text-align:center;">
+      <div style="font-size:2.5rem;margin-bottom:12px;">🔑</div>
+      <h2 style="font-family:'Lora',serif;font-size:1.3rem;margin-bottom:8px;">Enter your API Key</h2>
+      <p style="font-size:.87rem;color:var(--muted);margin-bottom:24px;line-height:1.6;">
+        This quiz uses the Anthropic AI to generate passages.<br>
+        Get your key from <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent)">console.anthropic.com</a> → API Keys.<br>
+        <strong>It is saved only in this browser — never shared.</strong>
+      </p>
+      <input
+        id="api-key-input"
+        type="password"
+        placeholder="sk-ant-..."
+        style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.9rem;margin-bottom:10px;outline:none;"
+        onkeydown="if(event.key==='Enter') submitApiKey()"
+      />
+      <div id="api-key-error" style="color:var(--red);font-size:.8rem;margin-bottom:10px;min-height:18px;"></div>
+      <button class="btn-primary" style="width:100%;padding:12px;" onclick="submitApiKey()">Save &amp; Start Quiz</button>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:16px;">Each quiz costs ~$0.01 USD in API credits.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div id="main-content" style="display:none">
 <div class="container">
 
   <!-- Player -->
@@ -285,7 +312,13 @@
   </div>
 
   <div id="quiz-area"></div>
+</div><!-- end container -->
+
+<div style="text-align:center;padding:20px 0 40px;border-top:1px solid var(--border);margin-top:20px;">
+  <button class="btn-secondary" style="font-size:.78rem;padding:6px 14px;color:var(--muted);" onclick="clearApiKey()">🔑 Change API Key</button>
 </div>
+
+</div><!-- end main-content -->
 
 <script>
 const PLAYERS = ['Daddy','Mummy','Jayden'];
@@ -395,6 +428,52 @@ Return ONLY this JSON (no markdown, no extra text):
 All 15 blank objects required. "a" array must always include "p". All values in "a" must be single words.`;
 }
 
+// ── API Key management (stored in localStorage) ──
+const KEY_STORAGE = 'psle-cloze-apikey';
+
+function getApiKey() {
+  return localStorage.getItem(KEY_STORAGE) || '';
+}
+
+function saveApiKey(key) {
+  localStorage.setItem(KEY_STORAGE, key.trim());
+}
+
+function clearApiKey() {
+  localStorage.removeItem(KEY_STORAGE);
+  showApiSetup();
+}
+
+function showApiSetup() {
+  document.getElementById('api-setup').style.display = 'block';
+  document.getElementById('main-content').style.display = 'none';
+}
+
+function hideApiSetup() {
+  document.getElementById('api-setup').style.display = 'none';
+  document.getElementById('main-content').style.display = 'block';
+}
+
+function submitApiKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val.startsWith('sk-ant-')) {
+    document.getElementById('api-key-error').textContent = 'That doesn\'t look right — the key should start with sk-ant-';
+    return;
+  }
+  saveApiKey(val);
+  document.getElementById('api-key-error').textContent = '';
+  hideApiSetup();
+}
+
+// Check on load
+window.addEventListener('DOMContentLoaded', () => {
+  if (!getApiKey()) {
+    showApiSetup();
+  } else {
+    hideApiSetup();
+  }
+});
+
 // ── Validate that answers are truly single words ──
 function isSingleWord(w) {
   return typeof w === 'string' && w.trim().split(/\s+/).length === 1 && w.trim().length > 0;
@@ -423,9 +502,16 @@ async function generateQuiz() {
   submitted = false; quizData = null;
 
   try {
+    const apiKey = getApiKey();
+    if (!apiKey) { showApiSetup(); return; }
     const resp = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers: {"Content-Type":"application/json"},
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 3000,
@@ -433,6 +519,10 @@ async function generateQuiz() {
       })
     });
     const data = await resp.json();
+    if (resp.status === 401) {
+      clearApiKey();
+      throw new Error("Invalid API key — please re-enter it.");
+    }
     const raw = data.content.map(i=>i.text||'').join('').trim();
     const clean = raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
     const parsed = JSON.parse(clean);
