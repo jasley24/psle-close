@@ -447,15 +447,20 @@ function renderCompPanel() {
   const topics=TOPICS[currentComp];
   const panel=document.getElementById('comp-panel');
   let topicHtml='';
+  let _allTopics=[];
   Object.entries(topics).forEach(([section,list])=>{
     topicHtml+=`<div class="topic-section">${section}</div><div class="topic-grid">`;
-    list.forEach((t,i)=>{
+    list.forEach((t)=>{
+      const idx=_allTopics.length;
+      _allTopics.push(t);
       const isHard=section.includes('Harder')||section.includes('Hard')||section.includes('Tricky');
       const active=(selectedTopic===t)?'active':'';
-      topicHtml+=`<button class="topic-chip ${isHard?'hard':''} ${active}" data-topic="${t}" onclick="selectTopic(this,'${t.replace(/'/g,"\\'")}')">${t.split(':')[0].split('(')[0].trim().substring(0,30)}</button>`;
+      const label=t.split(':')[0].split('(')[0].trim().substring(0,30);
+      topicHtml+=`<button class="topic-chip ${isHard?'hard':''} ${active}" data-idx="${idx}" onclick="selectTopicByIdx(this)">${label}</button>`;
     });
     topicHtml+='</div>';
   });
+  window._compTopics=_allTopics;
   panel.innerHTML=`
     <div class="card">
       <div class="comp-header">
@@ -475,18 +480,19 @@ function renderCompPanel() {
     </div>
     <div id="quiz-area"></div>`;
 }
-function selectTopic(btn, topic) {
-  // Only deactivate chips in the same component panel
+function selectTopicByIdx(btn) {
+  const idx = parseInt(btn.dataset.idx);
   document.querySelectorAll('#comp-panel .topic-chip').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  selectedTopic=topic;
+  selectedTopic = window._compTopics[idx];
 }
 function pickRandom() {
   const all=Object.values(TOPICS[currentComp]).flat();
   const pick=all[Math.floor(Math.random()*all.length)];
   selectedTopic=pick;
-  document.querySelectorAll('.topic-chip').forEach(b=>{
-    b.classList.toggle('active',b.dataset.topic===pick);
+  document.querySelectorAll('#comp-panel .topic-chip').forEach(b=>{
+    const t=window._compTopics?window._compTopics[parseInt(b.dataset.idx)]:null;
+    b.classList.toggle('active', t===pick);
   });
   generateQuiz();
 }
