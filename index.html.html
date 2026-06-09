@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Family PSLE Cloze Challenge v3</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap');
+  :root {
+    --ink:#1a1a2e; --paper:#faf8f4; --accent:#2e7d6e; --accent-light:#e6f4f1;
+    --red:#c0392b; --red-light:#fdf0ee; --gold:#b5860d; --border:#ddd9d0;
+    --white:#ffffff; --muted:#6b6b7a;
+    --daddy:#2563eb; --daddy-light:#eff6ff;
+    --mummy:#9333ea; --mummy-light:#faf5ff;
+    --jayden:#ea580c; --jayden-light:#fff7ed;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;}
+  header{background:var(--ink);color:white;padding:14px 24px;display:flex;align-items:center;gap:10px;}
+  header .logo{font-family:'Lora',serif;font-size:1.15rem;font-weight:600;}
+  header .badge{margin-left:auto;background:var(--accent);color:white;font-size:.7rem;font-weight:600;padding:3px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.5px;}
+  .container{max-width:780px;margin:0 auto;padding:28px 20px 60px;}
+  .card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:18px;}
+  .card-title{font-size:.74rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+
+  /* Player */
+  .player-grid{display:flex;gap:10px;flex-wrap:wrap;}
+  .player-btn{flex:1;min-width:100px;padding:14px 10px;border-radius:10px;border:2px solid var(--border);background:var(--paper);cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;font-size:.92rem;display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .15s;color:var(--muted);}
+  .player-btn .av{font-size:1.8rem;}
+  .player-btn .chip{font-size:.67rem;font-weight:600;padding:2px 7px;border-radius:99px;background:var(--border);color:var(--muted);transition:all .15s;}
+  .player-btn[data-p="Daddy"]:hover,.player-btn[data-p="Daddy"].active{border-color:var(--daddy);background:var(--daddy-light);color:var(--daddy);}
+  .player-btn[data-p="Mummy"]:hover,.player-btn[data-p="Mummy"].active{border-color:var(--mummy);background:var(--mummy-light);color:var(--mummy);}
+  .player-btn[data-p="Jayden"]:hover,.player-btn[data-p="Jayden"].active{border-color:var(--jayden);background:var(--jayden-light);color:var(--jayden);}
+  .player-btn[data-p="Daddy"].active .chip{background:var(--daddy);color:white;}
+  .player-btn[data-p="Mummy"].active .chip{background:var(--mummy);color:white;}
+  .player-btn[data-p="Jayden"].active .chip{background:var(--jayden);color:white;}
+
+  /* Leaderboard */
+  .lb-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .lb-reset{font-size:.72rem;color:var(--muted);background:none;border:1px solid var(--border);padding:3px 9px;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500;}
+  .lb-rows{display:flex;flex-direction:column;gap:8px;}
+  .lb-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;background:var(--paper);}
+  .lb-row.r-Daddy{background:var(--daddy-light);} .lb-row.r-Mummy{background:var(--mummy-light);} .lb-row.r-Jayden{background:var(--jayden-light);}
+  .lb-rank{font-size:1rem;width:22px;text-align:center;flex-shrink:0;}
+  .lb-av{font-size:1.25rem;flex-shrink:0;}
+  .lb-name{font-weight:700;font-size:.9rem;flex:1;}
+  .lb-name.c-Daddy{color:var(--daddy);} .lb-name.c-Mummy{color:var(--mummy);} .lb-name.c-Jayden{color:var(--jayden);}
+  .lb-bar-wrap{width:70px;height:6px;background:var(--border);border-radius:99px;overflow:hidden;flex-shrink:0;}
+  .lb-bar{height:100%;border-radius:99px;transition:width .4s;}
+  .b-Daddy{background:var(--daddy);} .b-Mummy{background:var(--mummy);} .b-Jayden{background:var(--jayden);}
+  .lb-stats{font-size:.78rem;color:var(--muted);text-align:right;line-height:1.5;}
+  .lb-stats strong{color:var(--ink);}
+
+  /* Topics */
+  .topic-section-label{font-size:.68rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin:12px 0 7px;padding-left:2px;}
+  .topic-section-label:first-child{margin-top:0;}
+  .topic-grid{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px;}
+  .topic-btn{padding:6px 13px;border-radius:99px;font-size:.82rem;border:1.5px solid var(--border);background:var(--paper);color:var(--ink);font-weight:500;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;}
+  .topic-btn:hover,.topic-btn.active{background:var(--accent);color:white;border-color:var(--accent);}
+  .topic-btn.hard{border-color:#f0c8c4;}
+  .topic-btn.hard:hover,.topic-btn.hard.active{background:#c0392b;border-color:#c0392b;color:white;}
+  .difficulty-legend{display:flex;gap:14px;margin-top:10px;font-size:.73rem;color:var(--muted);}
+  .legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle;}
+
+  /* Buttons */
+  button{font-family:'Inter',sans-serif;font-weight:600;cursor:pointer;border:none;border-radius:7px;padding:10px 20px;font-size:.9rem;transition:opacity .15s,transform .1s;}
+  button:active{transform:scale(.97);}
+  button:disabled{opacity:.45;cursor:default;}
+  .btn-primary{background:var(--accent);color:white;}
+  .btn-secondary{background:var(--white);color:var(--ink);border:1px solid var(--border);}
+  .btn-warn{background:var(--red-light);color:var(--red);border:1px solid #f0c8c4;}
+  .gen-bar{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;}
+
+  /* Quiz */
+  .meta-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;}
+  .meta-pill{font-size:.77rem;font-weight:500;color:var(--muted);background:var(--white);border:1px solid var(--border);padding:4px 11px;border-radius:99px;}
+  .player-pill{font-size:.77rem;font-weight:700;padding:4px 12px;border-radius:99px;color:white;}
+  .pp-Daddy{background:var(--daddy);} .pp-Mummy{background:var(--mummy);} .pp-Jayden{background:var(--jayden);}
+  .topic-pill{font-size:.77rem;font-weight:500;color:var(--muted);background:var(--accent-light);border:1px solid #b2d8d0;padding:4px 11px;border-radius:99px;}
+
+  .passage-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:26px 28px;margin-bottom:22px;font-family:'Lora',serif;font-size:1.02rem;}
+  .passage-card h2{font-family:'Inter',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+  .passage-card p{line-height:2.2;margin-bottom:16px;}
+  .passage-card p:last-child{margin-bottom:0;}
+
+  /* blank-wrap sits inline; the hint floats absolutely so it never disturbs line-height */
+  .blank-wrap{display:inline-block;position:relative;vertical-align:middle;margin:0 3px;}
+  .blank-num{display:block;font-family:'Inter',sans-serif;font-size:.55rem;font-weight:700;color:var(--accent);text-align:center;line-height:1;margin-bottom:1px;}
+  .blank-input{display:block;width:110px;border:none;border-bottom:2px solid var(--border);background:transparent;font-family:'Lora',serif;font-size:.97rem;color:var(--ink);text-align:center;padding:0 4px 3px;outline:none;transition:border-color .15s;}
+  .blank-input:focus{border-bottom-color:var(--accent);}
+  .blank-input.correct{border-bottom-color:var(--accent);color:var(--accent);}
+  .blank-input.wrong{border-bottom-color:var(--red);color:var(--red);text-decoration:line-through;}
+  .blank-input.revealed{border-bottom-color:var(--gold);color:var(--gold);}
+  .blank-input:disabled{cursor:default;}
+  /* hint floats below without affecting line spacing */
+  .answer-hint{position:absolute;left:50%;transform:translateX(-50%);top:calc(100% + 2px);font-family:'Inter',sans-serif;font-size:.6rem;font-weight:700;white-space:nowrap;line-height:1;text-align:center;pointer-events:none;}
+  .answer-hint.correct{color:var(--accent);}
+  .answer-hint.wrong{color:var(--gold);}
+
+  .quiz-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+  #status-msg{font-size:.82rem;color:var(--muted);min-height:20px;}
+
+  .score-card{border-radius:10px;padding:20px 22px;display:flex;align-items:center;gap:18px;margin-bottom:20px;}
+  .sc-Daddy{background:var(--daddy-light);border:1px solid #bfdbfe;}
+  .sc-Mummy{background:var(--mummy-light);border:1px solid #e9d5ff;}
+  .sc-Jayden{background:var(--jayden-light);border:1px solid #fed7aa;}
+  .score-big{font-family:'Lora',serif;font-size:2.8rem;font-weight:600;line-height:1;flex-shrink:0;}
+  .sb-Daddy{color:var(--daddy);} .sb-Mummy{color:var(--mummy);} .sb-Jayden{color:var(--jayden);}
+  .score-detail{font-size:.88rem;color:var(--ink);line-height:1.7;}
+
+  /* Review table shown after submit */
+  .review-table{width:100%;border-collapse:collapse;font-size:.83rem;margin-top:16px;}
+  .review-table th{text-align:left;padding:7px 10px;background:var(--paper);font-weight:700;font-size:.73rem;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--border);}
+  .review-table td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
+  .review-table tr.correct-row td{background:#f0fdf9;}
+  .review-table tr.wrong-row td{background:#fff8f0;}
+  .tag-correct{display:inline-block;background:var(--accent-light);color:var(--accent);font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:4px;}
+  .tag-wrong{display:inline-block;background:var(--red-light);color:var(--red);font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:4px;}
+  .accepted-list{color:var(--accent);font-weight:600;}
+  .type-badge{display:inline-block;background:#f1f5f9;color:#475569;font-size:.62rem;padding:1px 6px;border-radius:4px;margin-left:4px;}
+
+  .hint-panel{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px 16px;margin-bottom:18px;font-size:.83rem;line-height:1.65;color:#78350f;}
+  .hint-toggle{font-size:.78rem;color:var(--accent);background:none;border:none;padding:0;cursor:pointer;font-weight:600;font-family:'Inter',sans-serif;margin-bottom:10px;}
+
+  .loading-state{text-align:center;padding:50px 20px;}
+  .spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading-state p{color:var(--muted);font-size:.9rem;}
+  .error-state{background:var(--red-light);border:1px solid #f0c8c4;border-radius:10px;padding:18px 22px;color:var(--red);font-size:.9rem;margin-bottom:18px;}
+  .instruction{font-size:.88rem;color:var(--muted);margin-bottom:18px;font-style:italic;font-family:'Lora',serif;}
+  .notice{background:var(--jayden-light);border:1px solid #fed7aa;border-radius:8px;padding:11px 15px;font-size:.86rem;color:#9a3412;margin-bottom:16px;display:none;}
+</style>
+</head>
+<body>
+
+<header>
+  <span style="font-size:1.2rem">📖</span>
+  <span class="logo">Family Cloze Challenge</span>
+  <span class="badge">PSLE Prep · v3</span>
+</header>
+
+<div class="container">
+
+  <!-- Player -->
+  <div class="card">
+    <div class="card-title">Who's playing?</div>
+    <div class="player-grid">
+      <button class="player-btn" data-p="Daddy" onclick="selectPlayer('Daddy')">
+        <span class="av">👨</span><span>Daddy</span>
+        <span class="chip" id="chip-Daddy">0 played</span>
+      </button>
+      <button class="player-btn" data-p="Mummy" onclick="selectPlayer('Mummy')">
+        <span class="av">👩</span><span>Mummy</span>
+        <span class="chip" id="chip-Mummy">0 played</span>
+      </button>
+      <button class="player-btn" data-p="Jayden" onclick="selectPlayer('Jayden')">
+        <span class="av">👦</span><span>Jayden</span>
+        <span class="chip" id="chip-Jayden">0 played</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Leaderboard -->
+  <div class="card">
+    <div class="lb-header">
+      <div class="card-title" style="margin-bottom:0">🏆 Leaderboard</div>
+      <button class="lb-reset" onclick="confirmReset()">Reset scores</button>
+    </div>
+    <div class="lb-rows" id="lb-rows">
+      <div style="font-size:.85rem;color:var(--muted);text-align:center;padding:8px 0">No scores yet — play a quiz!</div>
+    </div>
+  </div>
+
+  <!-- Topics -->
+  <div class="card">
+    <div class="card-title">Choose a topic</div>
+
+    <div class="topic-section-label">🇸🇬 Singapore &amp; Society</div>
+    <div class="topic-grid">
+      <button class="topic-btn active" data-topic="wet markets and hawker culture in Singapore" data-label="Wet Markets">Wet Markets</button>
+      <button class="topic-btn" data-topic="Singapore's kampong spirit and community living" data-label="Kampong Spirit">Kampong Spirit</button>
+      <button class="topic-btn" data-topic="Singapore's multiracial festivals and traditions" data-label="Festivals">Festivals</button>
+      <button class="topic-btn" data-topic="volunteering and community service in Singapore" data-label="Volunteering">Volunteering</button>
+      <button class="topic-btn" data-topic="Singapore's public transport system (MRT and buses)" data-label="Public Transport">Public Transport</button>
+      <button class="topic-btn" data-topic="the history and significance of the Singapore Botanic Gardens" data-label="Botanic Gardens">Botanic Gardens</button>
+      <button class="topic-btn" data-topic="National Service and its importance to Singapore" data-label="National Service">National Service</button>
+      <button class="topic-btn" data-topic="Singapore's journey from fishing village to modern city" data-label="Singapore History">SG History</button>
+      <button class="topic-btn" data-topic="Sentosa island as a leisure and heritage destination" data-label="Sentosa">Sentosa</button>
+      <button class="topic-btn" data-topic="the importance of neighbourliness and HDB community life" data-label="HDB Life">HDB Life</button>
+    </div>
+
+    <div class="topic-section-label">🐾 Animals &amp; Nature</div>
+    <div class="topic-grid">
+      <button class="topic-btn" data-topic="human-animal relationships and working animals" data-label="Human &amp; Animals">Human &amp; Animals</button>
+      <button class="topic-btn" data-topic="army ants and their colony behaviour" data-label="Army Ants">Army Ants</button>
+      <button class="topic-btn" data-topic="honeybees and the importance of pollination" data-label="Honeybees">Honeybees</button>
+      <button class="topic-btn" data-topic="lizards and reptiles and their survival adaptations" data-label="Reptiles">Reptiles</button>
+      <button class="topic-btn" data-topic="marine life and ocean conservation" data-label="Marine Life">Marine Life</button>
+      <button class="topic-btn" data-topic="rainforest biodiversity and endangered animals" data-label="Rainforest">Rainforest</button>
+      <button class="topic-btn" data-topic="migratory birds and their navigation instincts" data-label="Migratory Birds">Migratory Birds</button>
+      <button class="topic-btn" data-topic="elephants and their social behaviour in the wild" data-label="Elephants">Elephants</button>
+      <button class="topic-btn" data-topic="sharks and their role in the ocean ecosystem" data-label="Sharks">Sharks</button>
+      <button class="topic-btn" data-topic="cheetahs and their hunting adaptations on the savannah" data-label="Cheetahs">Cheetahs</button>
+      <button class="topic-btn" data-topic="dogs as working animals — guide dogs, rescue dogs, police dogs" data-label="Working Dogs">Working Dogs</button>
+      <button class="topic-btn" data-topic="the life cycle and silk production of silkworms" data-label="Silkworms">Silkworms</button>
+    </div>
+
+    <div class="topic-section-label">🌿 Health, Science &amp; Environment</div>
+    <div class="topic-grid">
+      <button class="topic-btn" data-topic="dental hygiene and healthy habits for children" data-label="Dental Health">Dental Health</button>
+      <button class="topic-btn" data-topic="the importance of sleep for growing children" data-label="Sleep">Sleep</button>
+      <button class="topic-btn" data-topic="water conservation and Singapore's water supply" data-label="Water">Water</button>
+      <button class="topic-btn" data-topic="recycling and managing waste in Singapore" data-label="Recycling">Recycling</button>
+      <button class="topic-btn" data-topic="climate change and its effects on our daily lives" data-label="Climate Change">Climate Change</button>
+      <button class="topic-btn" data-topic="the human digestive system and nutrition" data-label="Nutrition">Nutrition</button>
+      <button class="topic-btn" data-topic="exercise and its benefits for the body and mind" data-label="Exercise">Exercise</button>
+      <button class="topic-btn" data-topic="how vaccines protect us from infectious diseases" data-label="Vaccines">Vaccines</button>
+      <button class="topic-btn" data-topic="urban farming and growing food in cities" data-label="Urban Farming">Urban Farming</button>
+      <button class="topic-btn" data-topic="the water cycle and how rain is formed" data-label="Water Cycle">Water Cycle</button>
+      <button class="topic-btn" data-topic="the importance of trees and forests to the environment" data-label="Forests">Forests</button>
+      <button class="topic-btn" data-topic="plastic pollution and its impact on oceans" data-label="Plastic Pollution">Plastic Pollution</button>
+    </div>
+
+    <div class="topic-section-label">🚀 Technology &amp; Innovation</div>
+    <div class="topic-grid">
+      <button class="topic-btn" data-topic="robots and artificial intelligence in everyday life" data-label="Robots &amp; AI">Robots &amp; AI</button>
+      <button class="topic-btn" data-topic="the history of a famous invention like the telephone" data-label="Inventions">Inventions</button>
+      <button class="topic-btn" data-topic="responsible use of smartphones and social media" data-label="Smartphones">Smartphones</button>
+      <button class="topic-btn" data-topic="electric vehicles and the future of transport" data-label="Electric Cars">Electric Cars</button>
+      <button class="topic-btn" data-topic="how satellites help us with navigation and weather forecasting" data-label="Satellites">Satellites</button>
+      <button class="topic-btn" data-topic="3D printing and how it is changing manufacturing" data-label="3D Printing">3D Printing</button>
+      <button class="topic-btn" data-topic="drones and their uses in delivery, farming and rescue" data-label="Drones">Drones</button>
+      <button class="topic-btn" data-topic="the internet and how it connects the world" data-label="The Internet">The Internet</button>
+    </div>
+
+    <div class="topic-section-label">🎭 Culture, People &amp; Values</div>
+    <div class="topic-grid">
+      <button class="topic-btn" data-topic="a young person overcoming a personal challenge through perseverance" data-label="Perseverance">Perseverance</button>
+      <button class="topic-btn" data-topic="the importance of reading and libraries" data-label="Reading">Reading</button>
+      <button class="topic-btn" data-topic="sports values like teamwork and sportsmanship" data-label="Sports Values">Sports Values</button>
+      <button class="topic-btn" data-topic="cooking traditional food and preserving recipes" data-label="Traditional Food">Traditional Food</button>
+      <button class="topic-btn" data-topic="gardening and the benefits of growing your own vegetables" data-label="Gardening">Gardening</button>
+      <button class="topic-btn" data-topic="the value of kindness and helping those in need" data-label="Kindness">Kindness</button>
+      <button class="topic-btn" data-topic="the role of grandparents in family life and passing down wisdom" data-label="Grandparents">Grandparents</button>
+      <button class="topic-btn" data-topic="money management and saving habits for children" data-label="Saving Money">Saving Money</button>
+      <button class="topic-btn" data-topic="the history and culture of the Olympics" data-label="Olympics">Olympics</button>
+      <button class="topic-btn" data-topic="the art of calligraphy and its cultural heritage" data-label="Calligraphy">Calligraphy</button>
+    </div>
+
+    <div class="topic-section-label">🌍 World &amp; Geography</div>
+    <div class="topic-grid">
+      <button class="topic-btn" data-topic="the Amazon rainforest and its importance to the planet" data-label="Amazon">Amazon</button>
+      <button class="topic-btn" data-topic="deserts of the world and how animals survive in them" data-label="Deserts">Deserts</button>
+      <button class="topic-btn" data-topic="volcanoes and how they are formed" data-label="Volcanoes">Volcanoes</button>
+      <button class="topic-btn" data-topic="life at the polar regions — the Arctic and Antarctic" data-label="Polar Regions">Polar Regions</button>
+      <button class="topic-btn" data-topic="the Great Barrier Reef and coral conservation" data-label="Coral Reefs">Coral Reefs</button>
+      <button class="topic-btn" data-topic="how mountains are formed and the challenges of climbing them" data-label="Mountains">Mountains</button>
+    </div>
+
+    <div class="topic-section-label">🔴 Harder (AL1–AL2 challenge)</div>
+    <div class="topic-grid">
+      <button class="topic-btn hard" data-topic="bioluminescence in deep sea creatures" data-label="Bioluminescence">Bioluminescence</button>
+      <button class="topic-btn hard" data-topic="the Great Wildebeest Migration on the Serengeti" data-label="Serengeti Migration">Serengeti Migration</button>
+      <button class="topic-btn hard" data-topic="Singapore's NEWater treatment technology" data-label="NEWater">NEWater</button>
+      <button class="topic-btn hard" data-topic="the placebo effect and how the mind affects healing" data-label="Placebo Effect">Placebo Effect</button>
+      <button class="topic-btn hard" data-topic="echolocation in bats and dolphins" data-label="Echolocation">Echolocation</button>
+      <button class="topic-btn hard" data-topic="camouflage and mimicry as survival strategies in nature" data-label="Camouflage">Camouflage</button>
+      <button class="topic-btn hard" data-topic="photosynthesis and how plants produce energy from sunlight" data-label="Photosynthesis">Photosynthesis</button>
+      <button class="topic-btn hard" data-topic="the science of sleep and why we dream" data-label="Dreams &amp; Sleep">Dreams &amp; Sleep</button>
+      <button class="topic-btn hard" data-topic="ocean currents and their effect on global climate" data-label="Ocean Currents">Ocean Currents</button>
+      <button class="topic-btn hard" data-topic="the human brain and how memory works" data-label="Memory &amp; Brain">Memory &amp; Brain</button>
+    </div>
+
+    <div class="difficulty-legend">
+      <span><span class="legend-dot" style="background:var(--accent)"></span>Standard (AL3–AL4)</span>
+      <span><span class="legend-dot" style="background:#c0392b"></span>Harder (AL1–AL2)</span>
+    </div>
+  </div>
+
+  <div class="notice" id="notice">☝️ Please select a player above before generating a quiz.</div>
+
+  <div class="gen-bar">
+    <button class="btn-primary" id="gen-btn" onclick="generateQuiz()">🎲 Generate Quiz</button>
+    <button class="btn-secondary" id="random-btn" onclick="pickRandom()">🔀 Surprise Me</button>
+  </div>
+
+  <div id="quiz-area"></div>
+</div>
+
+<script>
+const PLAYERS = ['Daddy','Mummy','Jayden'];
+const AVATARS = {Daddy:'👨',Mummy:'👩',Jayden:'👦'};
+const MEDALS  = ['🥇','🥈','🥉'];
+const STORAGE_KEY = 'family-cloze-scores-v3';
+
+let quizData = null;
+let submitted = false;
+let selectedTopic = 'wet markets and hawker culture in Singapore';
+let selectedLabel = 'Wet Markets';
+let currentPlayer = null;
+
+// ── Storage ──
+async function loadScores() {
+  try {
+    const r = await window.storage.get(STORAGE_KEY);
+    if (r && r.value) return JSON.parse(r.value);
+  } catch(e) {}
+  return {Daddy:{quizzes:0,total:0,best:0},Mummy:{quizzes:0,total:0,best:0},Jayden:{quizzes:0,total:0,best:0}};
+}
+async function saveScores(s) { try { await window.storage.set(STORAGE_KEY, JSON.stringify(s)); } catch(e) {} }
+async function recordScore(player, correct) {
+  const s = await loadScores();
+  s[player].quizzes++; s[player].total += correct;
+  if (correct > s[player].best) s[player].best = correct;
+  await saveScores(s); renderLeaderboard(s);
+}
+async function confirmReset() {
+  if (!confirm('Reset all scores? This cannot be undone.')) return;
+  const blank = {Daddy:{quizzes:0,total:0,best:0},Mummy:{quizzes:0,total:0,best:0},Jayden:{quizzes:0,total:0,best:0}};
+  await saveScores(blank); renderLeaderboard(blank);
+}
+
+// ── Leaderboard ──
+function renderLeaderboard(scores) {
+  PLAYERS.forEach(p => {
+    const d = scores[p]||{quizzes:0};
+    document.getElementById('chip-'+p).textContent = d.quizzes===0 ? '0 played' : d.quizzes+' played';
+  });
+  const ranked = PLAYERS.map(p => {
+    const d = scores[p]||{quizzes:0,total:0,best:0};
+    return {...d,name:p,avg:d.quizzes>0?d.total/d.quizzes:0};
+  }).sort((a,b)=>b.avg-a.avg||b.quizzes-a.quizzes);
+  const container = document.getElementById('lb-rows');
+  if (ranked.every(r=>r.quizzes===0)) {
+    container.innerHTML='<div style="font-size:.85rem;color:var(--muted);text-align:center;padding:8px 0">No scores yet — play a quiz!</div>';
+    return;
+  }
+  container.innerHTML = ranked.map((r,i)=>{
+    const bw = Math.round((r.avg/15)*100);
+    const avg = r.quizzes>0 ? r.avg.toFixed(1) : '—';
+    return `<div class="lb-row r-${r.name}">
+      <span class="lb-rank">${r.quizzes>0?MEDALS[i]:'—'}</span>
+      <span class="lb-av">${AVATARS[r.name]}</span>
+      <span class="lb-name c-${r.name}">${r.name}</span>
+      <div class="lb-bar-wrap"><div class="lb-bar b-${r.name}" style="width:${bw}%"></div></div>
+      <div class="lb-stats">Avg <strong>${avg}/15</strong><br>Best <strong>${r.best}/15</strong> · ${r.quizzes} played</div>
+    </div>`;
+  }).join('');
+}
+(async()=>{ renderLeaderboard(await loadScores()); })();
+
+// ── Player select ──
+function selectPlayer(name) {
+  currentPlayer = name;
+  document.querySelectorAll('.player-btn').forEach(b=>b.classList.toggle('active',b.dataset.p===name));
+  document.getElementById('notice').style.display='none';
+}
+
+// ── Topic select ──
+document.querySelectorAll('.topic-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.topic-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedTopic = btn.dataset.topic;
+    selectedLabel = btn.dataset.label;
+  });
+});
+
+function pickRandom() {
+  const btns = Array.from(document.querySelectorAll('.topic-btn'));
+  const pick = btns[Math.floor(Math.random()*btns.length)];
+  document.querySelectorAll('.topic-btn').forEach(b=>b.classList.remove('active'));
+  pick.classList.add('active');
+  selectedTopic = pick.dataset.topic;
+  selectedLabel = pick.dataset.label;
+  generateQuiz();
+}
+
+// ── AI Prompt ──
+function buildPrompt(topic) {
+  return `You are a Singapore MOE primary school English teacher writing a PSLE Paper 2 Comprehension Cloze passage.
+
+TOPIC: ${topic}
+
+RULES:
+1. Non-fiction informational text, P5/P6 level, 4 paragraphs, ~200 words when blanks are filled.
+2. Exactly 15 blanks marked [BLANK_1] to [BLANK_15], at least 3 per paragraph.
+3. Each blank = EXACTLY ONE WORD (no phrases, no hyphens, no contractions).
+4. Blank types: ~5 verbs, ~3 prepositions, ~3 collocations (single key word), ~2 conjunctions, ~2 nouns/adjectives. Avoid trivial words like "a", "the", "is".
+5. For each blank provide: the best single-word answer AND any other single words that are equally correct (synonyms, valid grammar alternatives). Keep explanations to 10 words max.
+
+Return ONLY this JSON (no markdown, no extra text):
+{"title":"...","passage":"...with [BLANK_1] through [BLANK_15]...","blanks":[{"n":1,"p":"word","a":["word","alt1"],"t":"verb","e":"short clue"},{"n":2,"p":"word","a":["word"],"t":"preposition","e":"short clue"}]}
+
+All 15 blank objects required. "a" array must always include "p". All values in "a" must be single words.`;
+}
+
+// ── Validate that answers are truly single words ──
+function isSingleWord(w) {
+  return typeof w === 'string' && w.trim().split(/\s+/).length === 1 && w.trim().length > 0;
+}
+
+function sanitiseAccepted(arr) {
+  if (!Array.isArray(arr)) return [];
+  return [...new Set(arr.map(w => w.trim().toLowerCase()).filter(w => isSingleWord(w)))];
+}
+
+// ── Generate ──
+async function generateQuiz() {
+  if (!currentPlayer) {
+    document.getElementById('notice').style.display='block';
+    document.querySelector('.card').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  const area = document.getElementById('quiz-area');
+  const genBtn = document.getElementById('gen-btn');
+  area.innerHTML = `<div class="loading-state"><div class="spinner"></div>
+    <p>Crafting a PSLE-standard passage on <strong>${selectedLabel}</strong> for <strong>${currentPlayer}</strong>…</p>
+    <p style="margin-top:8px;font-size:.8rem;color:var(--muted)">Generating multi-answer key…</p>
+  </div>`;
+  genBtn.disabled = true;
+  document.getElementById('random-btn').disabled = true;
+  submitted = false; quizData = null;
+
+  try {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 3000,
+        messages: [{role:"user", content: buildPrompt(selectedTopic)}]
+      })
+    });
+    const data = await resp.json();
+    const raw = data.content.map(i=>i.text||'').join('').trim();
+    const clean = raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
+    const parsed = JSON.parse(clean);
+
+    if (!parsed.passage || !Array.isArray(parsed.blanks) || parsed.blanks.length !== 15)
+      throw new Error("Invalid quiz structure — expected 15 blanks");
+
+    // Normalise compact field names (n/p/a/t/e) to full names, support both formats
+    parsed.blanks = parsed.blanks.map((b, idx) => ({
+      number:         b.number         ?? b.n ?? (idx + 1),
+      primaryAnswer:  b.primaryAnswer  ?? b.p ?? '',
+      acceptedAnswers: b.acceptedAnswers ?? b.a ?? [],
+      type:           b.type           ?? b.t ?? '',
+      explanation:    b.explanation    ?? b.e ?? '',
+    }));
+
+    // Validate and sanitise all answers are single words
+    for (const b of parsed.blanks) {
+      if (!isSingleWord(b.primaryAnswer))
+        throw new Error(`Blank ${b.number} primaryAnswer "${b.primaryAnswer}" is not a single word`);
+      b.acceptedAnswers = sanitiseAccepted(b.acceptedAnswers);
+      if (b.acceptedAnswers.length === 0)
+        b.acceptedAnswers = [b.primaryAnswer.trim().toLowerCase()];
+      // Ensure primary is always in the accepted list
+      const normPrimary = b.primaryAnswer.trim().toLowerCase();
+      if (!b.acceptedAnswers.includes(normPrimary))
+        b.acceptedAnswers.unshift(normPrimary);
+    }
+
+    quizData = parsed;
+    renderQuiz();
+  } catch(err) {
+    area.innerHTML = `<div class="error-state">⚠️ Couldn't generate quiz. Please try again.<br><small style="opacity:.7">${err.message}</small></div>
+    <div class="gen-bar"><button class="btn-secondary" onclick="generateQuiz()">Try Again</button></div>`;
+  } finally {
+    genBtn.disabled = false;
+    document.getElementById('random-btn').disabled = false;
+  }
+}
+
+// ── Render quiz ──
+function renderQuiz() {
+  let html = quizData.passage;
+  for (let i = 1; i <= 15; i++) {
+    html = html.replace(`[BLANK_${i}]`,
+      `<span class="blank-wrap">
+        <span class="blank-num">${i}</span>
+        <input class="blank-input" id="b${i}" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="___"/>
+        <span class="answer-hint" id="h${i}"></span>
+      </span>`
+    );
+  }
+  // Split passage into paragraphs robustly (handles \n\n or \n)
+  const paras = html
+    .split(/\n{2,}/)                          // try double-newline first
+    .flatMap(chunk => chunk.split(/\n/))      // then single newlines
+    .map(p => p.trim())
+    .filter(p => p.length > 0)
+    .map(p => `<p>${p}</p>`)
+    .join('');
+
+  document.getElementById('quiz-area').innerHTML = `
+    <div class="meta-bar">
+      <span class="player-pill pp-${currentPlayer}">${AVATARS[currentPlayer]} ${currentPlayer}</span>
+      <span class="topic-pill">📌 ${selectedLabel}</span>
+      <span class="meta-pill">📊 15 blanks</span>
+      <span class="meta-pill">🎯 PSLE Standard</span>
+    </div>
+
+    <button class="hint-toggle" id="hint-toggle-btn" onclick="toggleHints()">💡 Show answer-type hints</button>
+    <div id="hint-panel" style="display:none" class="hint-panel">
+      <strong>Answer types for each blank:</strong><br>
+      <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;">
+        ${quizData.blanks.map(b=>`<span style="white-space:nowrap"><strong>${b.number}.</strong> <em>${b.type}</em></span>`).join(' &nbsp;')}
+      </div>
+    </div>
+
+    <p class="instruction">Fill in each blank with the most suitable word. Only one word per blank. Spelling must be accurate.</p>
+
+    <div class="passage-card">
+      <h2>${quizData.title || 'Comprehension Cloze'}</h2>
+      ${paras}
+    </div>
+
+    <div id="score-area"></div>
+
+    <div class="quiz-actions">
+      <button class="btn-primary" id="submit-btn" onclick="submitQuiz()">Check Answers</button>
+      <button class="btn-warn" id="reveal-btn" onclick="revealAll()" style="display:none">Reveal All Answers</button>
+      <button class="btn-secondary" onclick="resetQuiz()">Clear</button>
+    </div>
+    <div id="status-msg"></div>
+    <div id="review-area"></div>`;
+
+  for (let i=1;i<=15;i++) {
+    document.getElementById(`b${i}`).addEventListener('keydown', e=>{
+      if (e.key==='Enter') { e.preventDefault(); const n=document.getElementById(`b${i+1}`); if(n) n.focus(); }
+    });
+  }
+  document.getElementById('quiz-area').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function toggleHints() {
+  const panel = document.getElementById('hint-panel');
+  const btn = document.getElementById('hint-toggle-btn');
+  const shown = panel.style.display !== 'none';
+  panel.style.display = shown ? 'none' : 'block';
+  btn.textContent = shown ? '💡 Show answer-type hints' : '💡 Hide hints';
+}
+
+// ── Normalise for comparison ──
+const norm = w => w.trim().toLowerCase().replace(/[^a-z']/g,'');
+
+// ── Submit ──
+async function submitQuiz() {
+  if (!quizData || submitted) return;
+
+  // Check all filled
+  for (let i=1;i<=15;i++) {
+    if (!document.getElementById(`b${i}`).value.trim()) {
+      document.getElementById('status-msg').textContent = 'Please fill in all 15 blanks before checking.';
+      return;
+    }
+  }
+
+  // Enforce single-word input
+  for (let i=1;i<=15;i++) {
+    const val = document.getElementById(`b${i}`).value.trim();
+    if (val.split(/\s+/).length > 1) {
+      document.getElementById('status-msg').textContent = `Blank ${i}: only one word allowed per blank.`;
+      document.getElementById(`b${i}`).focus();
+      return;
+    }
+  }
+
+  document.getElementById('status-msg').textContent = '';
+  submitted = true;
+
+  let correct = 0;
+  const results = [];
+
+  for (let i=1;i<=15;i++) {
+    const inp = document.getElementById(`b${i}`);
+    const hint = document.getElementById(`h${i}`);
+    const blank = quizData.blanks[i-1];
+    const userAns = norm(inp.value);
+    const accepted = blank.acceptedAnswers.map(a=>norm(a));
+    const isCorrect = accepted.includes(userAns);
+
+    inp.disabled = true;
+    results.push({i, blank, userAns: inp.value.trim(), isCorrect});
+
+    if (isCorrect) {
+      inp.classList.add('correct');
+      hint.textContent = '✓';
+      hint.className = 'answer-hint correct';
+      correct++;
+    } else {
+      inp.classList.add('wrong');
+      // Show the primary answer below the input
+      hint.textContent = blank.primaryAnswer;
+      hint.className = 'answer-hint wrong';
+    }
+  }
+
+  await recordScore(currentPlayer, correct);
+
+  const pct = Math.round(correct/15*100);
+  const grade = pct>=87 ? `🌟 Excellent, ${currentPlayer}!` : pct>=67 ? `👍 Good effort, ${currentPlayer}!` : `💪 Keep practising, ${currentPlayer}!`;
+  const alLevel = pct>=87 ? 'AL1–AL2 range' : pct>=67 ? 'AL2–AL3 range' : pct>=47 ? 'AL3–AL4 range' : 'AL4+ — more practice needed';
+
+  document.getElementById('score-area').innerHTML = `
+    <div class="score-card sc-${currentPlayer}">
+      <div class="score-big sb-${currentPlayer}">${correct}<span style="font-size:1.1rem;color:var(--muted)">/15</span></div>
+      <div class="score-detail">
+        <strong>${grade}</strong><br>
+        Scored <strong>${correct}/15</strong> (${pct}%) · <em>${alLevel}</em><br>
+        ${results.filter(r=>!r.isCorrect).length > 0
+          ? `Incorrect: blanks <strong>${results.filter(r=>!r.isCorrect).map(r=>r.i).join(', ')}</strong>`
+          : '🎉 All correct!'}
+      </div>
+    </div>`;
+
+  document.getElementById('submit-btn').style.display='none';
+  const wrongCount = results.filter(r=>!r.isCorrect).length;
+  if (wrongCount > 0) document.getElementById('reveal-btn').style.display='inline-block';
+
+  // Detailed review table
+  const reviewRows = results.map(r => {
+    const acceptedDisplay = r.blank.acceptedAnswers.join(', ');
+    const multipleAccepted = r.blank.acceptedAnswers.length > 1;
+    return `<tr class="${r.isCorrect?'correct-row':'wrong-row'}">
+      <td><strong>${r.i}</strong></td>
+      <td>${r.isCorrect
+        ? `<span class="tag-correct">✓ Correct</span> <em style="color:var(--accent)">${r.userAns}</em>`
+        : `<span class="tag-wrong">✗ Wrong</span> <em style="color:var(--red);text-decoration:line-through">${r.userAns}</em>`
+      }</td>
+      <td>
+        <span class="accepted-list">${r.blank.primaryAnswer}</span>
+        ${multipleAccepted ? `<br><span style="font-size:.75rem;color:var(--muted)">Also accepted: ${r.blank.acceptedAnswers.filter(a=>a!==r.blank.primaryAnswer.toLowerCase()).join(', ')}</span>` : ''}
+        <span class="type-badge">${r.blank.type}</span>
+      </td>
+      <td style="font-size:.78rem;color:var(--muted)">${r.blank.explanation||''}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('review-area').innerHTML = `
+    <div style="margin-top:20px">
+      <div class="card-title" style="margin-bottom:12px">📋 Answer Review</div>
+      <div style="overflow-x:auto">
+        <table class="review-table">
+          <thead><tr>
+            <th>#</th><th>Your Answer</th><th>Accepted Answer(s)</th><th>Why</th>
+          </tr></thead>
+          <tbody>${reviewRows}</tbody>
+        </table>
+      </div>
+    </div>`;
+
+  document.getElementById('score-area').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ── Reveal all wrong ──
+function revealAll() {
+  for (let i=1;i<=15;i++) {
+    const inp = document.getElementById(`b${i}`);
+    const hint = document.getElementById(`h${i}`);
+    if (inp && inp.classList.contains('wrong')) {
+      inp.classList.replace('wrong','revealed');
+      inp.value = quizData.blanks[i-1].primaryAnswer;
+      if (hint) { hint.textContent=''; hint.className='answer-hint'; }
+    }
+  }
+  document.getElementById('reveal-btn').style.display='none';
+}
+
+// ── Reset ──
+function resetQuiz() {
+  submitted = false;
+  for (let i=1;i<=15;i++) {
+    const inp=document.getElementById(`b${i}`), hint=document.getElementById(`h${i}`);
+    if(inp){inp.value='';inp.disabled=false;inp.className='blank-input';}
+    if(hint){hint.textContent='';hint.className='answer-hint';}
+  }
+  const els = ['score-area','review-area'];
+  els.forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=''; });
+  const sb=document.getElementById('submit-btn'); if(sb) sb.style.display='inline-block';
+  const rb=document.getElementById('reveal-btn'); if(rb) rb.style.display='none';
+  document.getElementById('status-msg').textContent='';
+  const f=document.getElementById('b1'); if(f) f.focus();
+}
+</script>
+</body>
+</html>
