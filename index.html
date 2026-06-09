@@ -377,7 +377,8 @@ function renderLeaderboard(scores) {
 }
 function showScreen(id) {
   ['screen-firebase','screen-api','screen-app'].forEach(s=>{
-    document.getElementById(s).style.display=(s===id)?'block':'none';
+    const el=document.getElementById(s);
+    if(el) el.style.display=(s===id)?'block':'none';
   });
 }
 function submitFbUrl() {
@@ -576,7 +577,7 @@ async function generateQuiz() {
   try {
     const apiKey=getApiKey();
     if (!apiKey){ resetApiKey(); return; }
-    const resp=await fetch('https:
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{
         'Content-Type':'application/json',
@@ -1032,6 +1033,14 @@ function resetQuizUI(){
   quizData=null;
   document.getElementById('quiz-area').innerHTML='';
 }
-window.addEventListener('DOMContentLoaded', ()=>initApp());</script>
+window.addEventListener('DOMContentLoaded', ()=>{
+  try {
+    initApp();
+  } catch(e) {
+    console.error('initApp error:', e);
+    // Fallback: show firebase setup
+    document.getElementById('screen-firebase').style.display='block';
+  }
+});</script>
 </body>
 </html>
