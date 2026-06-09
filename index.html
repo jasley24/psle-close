@@ -3,791 +3,1035 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Family PSLE Cloze Challenge v5</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap');
-  :root {
-    --ink:#1a1a2e; --paper:#faf8f4; --accent:#2e7d6e; --accent-light:#e6f4f1;
-    --red:#c0392b; --red-light:#fdf0ee; --gold:#b5860d; --border:#ddd9d0;
-    --white:#ffffff; --muted:#6b6b7a;
-    --daddy:#2563eb; --daddy-light:#eff6ff;
-    --mummy:#9333ea; --mummy-light:#faf5ff;
-    --jayden:#ea580c; --jayden-light:#fff7ed;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;}
-  header{background:var(--ink);color:white;padding:14px 24px;display:flex;align-items:center;gap:10px;}
-  header .logo{font-family:'Lora',serif;font-size:1.15rem;font-weight:600;}
-  header .badge{margin-left:auto;background:var(--accent);color:white;font-size:.7rem;font-weight:600;padding:3px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.5px;}
-  .container{max-width:780px;margin:0 auto;padding:28px 20px 60px;}
-  .card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:18px;}
-  .card-title{font-size:.74rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
-
-  /* Player */
-  .player-grid{display:flex;gap:10px;flex-wrap:wrap;}
-  .player-btn{flex:1;min-width:100px;padding:14px 10px;border-radius:10px;border:2px solid var(--border);background:var(--paper);cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;font-size:.92rem;display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .15s;color:var(--muted);}
-  .player-btn .av{font-size:1.8rem;}
-  .player-btn .chip{font-size:.67rem;font-weight:600;padding:2px 7px;border-radius:99px;background:var(--border);color:var(--muted);transition:all .15s;}
-  .player-btn[data-p="Daddy"]:hover,.player-btn[data-p="Daddy"].active{border-color:var(--daddy);background:var(--daddy-light);color:var(--daddy);}
-  .player-btn[data-p="Mummy"]:hover,.player-btn[data-p="Mummy"].active{border-color:var(--mummy);background:var(--mummy-light);color:var(--mummy);}
-  .player-btn[data-p="Jayden"]:hover,.player-btn[data-p="Jayden"].active{border-color:var(--jayden);background:var(--jayden-light);color:var(--jayden);}
-  .player-btn[data-p="Daddy"].active .chip{background:var(--daddy);color:white;}
-  .player-btn[data-p="Mummy"].active .chip{background:var(--mummy);color:white;}
-  .player-btn[data-p="Jayden"].active .chip{background:var(--jayden);color:white;}
-
-  /* Leaderboard */
-  .lb-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
-  .lb-reset{font-size:.72rem;color:var(--muted);background:none;border:1px solid var(--border);padding:3px 9px;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500;}
-  .lb-rows{display:flex;flex-direction:column;gap:8px;}
-  .lb-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;background:var(--paper);}
-  .lb-row.r-Daddy{background:var(--daddy-light);} .lb-row.r-Mummy{background:var(--mummy-light);} .lb-row.r-Jayden{background:var(--jayden-light);}
-  .lb-rank{font-size:1rem;width:22px;text-align:center;flex-shrink:0;}
-  .lb-av{font-size:1.25rem;flex-shrink:0;}
-  .lb-name{font-weight:700;font-size:.9rem;flex:1;}
-  .lb-name.c-Daddy{color:var(--daddy);} .lb-name.c-Mummy{color:var(--mummy);} .lb-name.c-Jayden{color:var(--jayden);}
-  .lb-bar-wrap{width:70px;height:6px;background:var(--border);border-radius:99px;overflow:hidden;flex-shrink:0;}
-  .lb-bar{height:100%;border-radius:99px;transition:width .4s;}
-  .b-Daddy{background:var(--daddy);} .b-Mummy{background:var(--mummy);} .b-Jayden{background:var(--jayden);}
-  .lb-stats{font-size:.78rem;color:var(--muted);text-align:right;line-height:1.5;}
-  .lb-stats strong{color:var(--ink);}
-
-  /* Topics */
-  .topic-section-label{font-size:.68rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin:12px 0 7px;padding-left:2px;}
-  .topic-section-label:first-child{margin-top:0;}
-  .topic-grid{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px;}
-  .topic-btn{padding:6px 13px;border-radius:99px;font-size:.82rem;border:1.5px solid var(--border);background:var(--paper);color:var(--ink);font-weight:500;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;}
-  .topic-btn:hover,.topic-btn.active{background:var(--accent);color:white;border-color:var(--accent);}
-  .topic-btn.hard{border-color:#f0c8c4;}
-  .topic-btn.hard:hover,.topic-btn.hard.active{background:#c0392b;border-color:#c0392b;color:white;}
-  .difficulty-legend{display:flex;gap:14px;margin-top:10px;font-size:.73rem;color:var(--muted);}
-  .legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle;}
-
-  /* Buttons */
-  button{font-family:'Inter',sans-serif;font-weight:600;cursor:pointer;border:none;border-radius:7px;padding:10px 20px;font-size:.9rem;transition:opacity .15s,transform .1s;}
-  button:active{transform:scale(.97);}
-  button:disabled{opacity:.45;cursor:default;}
-  .btn-primary{background:var(--accent);color:white;}
-  .btn-secondary{background:var(--white);color:var(--ink);border:1px solid var(--border);}
-  .btn-warn{background:var(--red-light);color:var(--red);border:1px solid #f0c8c4;}
-  .gen-bar{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;}
-
-  /* Quiz */
-  .meta-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;}
-  .meta-pill{font-size:.77rem;font-weight:500;color:var(--muted);background:var(--white);border:1px solid var(--border);padding:4px 11px;border-radius:99px;}
-  .player-pill{font-size:.77rem;font-weight:700;padding:4px 12px;border-radius:99px;color:white;}
-  .pp-Daddy{background:var(--daddy);} .pp-Mummy{background:var(--mummy);} .pp-Jayden{background:var(--jayden);}
-  .topic-pill{font-size:.77rem;font-weight:500;color:var(--muted);background:var(--accent-light);border:1px solid #b2d8d0;padding:4px 11px;border-radius:99px;}
-
-  .passage-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:26px 28px;margin-bottom:22px;font-family:'Lora',serif;font-size:1.02rem;}
-  .passage-card h2{font-family:'Inter',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
-  .passage-card p{line-height:2.2;margin-bottom:16px;}
-  .passage-card p:last-child{margin-bottom:0;}
-
-  /* blank-wrap sits inline; the hint floats absolutely so it never disturbs line-height */
-  .blank-wrap{display:inline-block;position:relative;vertical-align:middle;margin:0 3px;}
-  .blank-num{display:block;font-family:'Inter',sans-serif;font-size:.55rem;font-weight:700;color:var(--accent);text-align:center;line-height:1;margin-bottom:1px;}
-  .blank-input{display:block;width:110px;border:none;border-bottom:2px solid var(--border);background:transparent;font-family:'Lora',serif;font-size:.97rem;color:var(--ink);text-align:center;padding:0 4px 3px;outline:none;transition:border-color .15s;}
-  .blank-input:focus{border-bottom-color:var(--accent);}
-  .blank-input.correct{border-bottom-color:var(--accent);color:var(--accent);}
-  .blank-input.wrong{border-bottom-color:var(--red);color:var(--red);text-decoration:line-through;}
-  .blank-input.revealed{border-bottom-color:var(--gold);color:var(--gold);}
-  .blank-input:disabled{cursor:default;}
-  /* hint floats below without affecting line spacing */
-  .answer-hint{position:absolute;left:50%;transform:translateX(-50%);top:calc(100% + 2px);font-family:'Inter',sans-serif;font-size:.6rem;font-weight:700;white-space:nowrap;line-height:1;text-align:center;pointer-events:none;}
-  .answer-hint.correct{color:var(--accent);}
-  .answer-hint.wrong{color:var(--gold);}
-
-  .quiz-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
-  #status-msg{font-size:.82rem;color:var(--muted);min-height:20px;}
-
-  .score-card{border-radius:10px;padding:20px 22px;display:flex;align-items:center;gap:18px;margin-bottom:20px;}
-  .sc-Daddy{background:var(--daddy-light);border:1px solid #bfdbfe;}
-  .sc-Mummy{background:var(--mummy-light);border:1px solid #e9d5ff;}
-  .sc-Jayden{background:var(--jayden-light);border:1px solid #fed7aa;}
-  .score-big{font-family:'Lora',serif;font-size:2.8rem;font-weight:600;line-height:1;flex-shrink:0;}
-  .sb-Daddy{color:var(--daddy);} .sb-Mummy{color:var(--mummy);} .sb-Jayden{color:var(--jayden);}
-  .score-detail{font-size:.88rem;color:var(--ink);line-height:1.7;}
-
-  /* Review table shown after submit */
-  .review-table{width:100%;border-collapse:collapse;font-size:.83rem;margin-top:16px;}
-  .review-table th{text-align:left;padding:7px 10px;background:var(--paper);font-weight:700;font-size:.73rem;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--border);}
-  .review-table td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
-  .review-table tr.correct-row td{background:#f0fdf9;}
-  .review-table tr.wrong-row td{background:#fff8f0;}
-  .tag-correct{display:inline-block;background:var(--accent-light);color:var(--accent);font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:4px;}
-  .tag-wrong{display:inline-block;background:var(--red-light);color:var(--red);font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:4px;}
-  .accepted-list{color:var(--accent);font-weight:600;}
-  .type-badge{display:inline-block;background:#f1f5f9;color:#475569;font-size:.62rem;padding:1px 6px;border-radius:4px;margin-left:4px;}
-
-  .hint-panel{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px 16px;margin-bottom:18px;font-size:.83rem;line-height:1.65;color:#78350f;}
-  .hint-toggle{font-size:.78rem;color:var(--accent);background:none;border:none;padding:0;cursor:pointer;font-weight:600;font-family:'Inter',sans-serif;margin-bottom:10px;}
-
-  .loading-state{text-align:center;padding:50px 20px;}
-  .spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;}
-  @keyframes spin{to{transform:rotate(360deg);}}
-  .loading-state p{color:var(--muted);font-size:.9rem;}
-  .error-state{background:var(--red-light);border:1px solid #f0c8c4;border-radius:10px;padding:18px 22px;color:var(--red);font-size:.9rem;margin-bottom:18px;}
-  .instruction{font-size:.88rem;color:var(--muted);margin-bottom:18px;font-style:italic;font-family:'Lora',serif;}
-  .notice{background:var(--jayden-light);border:1px solid #fed7aa;border-radius:8px;padding:11px 15px;font-size:.86rem;color:#9a3412;margin-bottom:16px;display:none;}
-</style>
+<title>PSLE English Master Practice</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap');:root{--ink:#1a1a2e;--paper:#faf8f4;--white:#fff;--muted:#6b6b7a;--border:#ddd9d0;--accent:#2e7d6e;--accent-light:#e6f4f1;--red:#c0392b;--red-light:#fdf0ee;--gold:#b5860d;--daddy:#2563eb;--daddy-light:#eff6ff;--mummy:#9333ea;--mummy-light:#faf5ff;--jayden:#ea580c;--jayden-light:#fff7ed;}*{box-sizing:border-box;margin:0;padding:0;}body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;}header{background:var(--ink);color:#fff;padding:12px 20px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;}header .logo{font-family:'Lora',serif;font-size:1.1rem;font-weight:600;}header .badge{margin-left:auto;background:var(--accent);color:#fff;font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.5px;}.setup-wrap{max-width:520px;margin:40px auto;padding:0 20px;}.setup-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:32px 28px;}.setup-card h2{font-family:'Lora',serif;font-size:1.2rem;margin-bottom:8px;text-align:center;}.setup-card p{font-size:.85rem;color:var(--muted);margin-bottom:18px;line-height:1.6;text-align:center;}.setup-steps{background:var(--paper);border-radius:8px;padding:14px 16px;font-size:.82rem;line-height:1.9;margin-bottom:18px;}.setup-input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.88rem;margin-bottom:8px;outline:none;}.setup-input:focus{border-color:var(--accent);}.setup-error{color:var(--red);font-size:.78rem;margin-bottom:10px;min-height:16px;}button{font-family:'Inter',sans-serif;font-weight:600;cursor:pointer;border:none;border-radius:7px;padding:10px 18px;font-size:.88rem;transition:all .15s;}button:active{transform:scale(.97);}button:disabled{opacity:.45;cursor:default;}.btn-primary{background:var(--accent);color:#fff;}.btn-secondary{background:#fff;color:var(--ink);border:1px solid var(--border);}.btn-warn{background:var(--red-light);color:var(--red);border:1px solid #f0c8c4;}.btn-full{width:100%;padding:12px;margin-bottom:10px;}.btn-sm{font-size:.75rem;padding:4px 10px;}.app{display:flex;min-height:calc(100vh - 50px);}.sidebar{width:200px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);padding:16px 0;position:sticky;top:50px;height:calc(100vh - 50px);overflow-y:auto;}.sidebar-section{font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:8px 16px 4px;}.nav-btn{display:block;width:100%;text-align:left;background:none;border:none;padding:9px 16px;font-size:.85rem;font-weight:500;color:var(--muted);cursor:pointer;border-left:3px solid transparent;transition:all .15s;font-family:'Inter',sans-serif;border-radius:0;}.nav-btn:hover{background:var(--paper);color:var(--ink);}.nav-btn.active{background:var(--accent-light);color:var(--accent);border-left-color:var(--accent);font-weight:600;}.nav-btn .nav-mark{font-size:.65rem;color:var(--muted);margin-left:4px;}.content{flex:1;min-width:0;padding:24px 20px 60px;}.content-inner{max-width:680px;margin:0 auto;}.card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:16px;}.card-title{font-size:.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}.player-grid{display:flex;gap:8px;}.player-btn{flex:1;padding:12px 8px;border-radius:10px;border:2px solid var(--border);background:var(--paper);cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;font-size:.85rem;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .15s;color:var(--muted);}.player-btn .av{font-size:1.6rem;}.player-btn .chip{font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:99px;background:var(--border);color:var(--muted);transition:all .15s;}.player-btn[data-p="Daddy"]:hover,.player-btn[data-p="Daddy"].active{border-color:var(--daddy);background:var(--daddy-light);color:var(--daddy);}.player-btn[data-p="Mummy"]:hover,.player-btn[data-p="Mummy"].active{border-color:var(--mummy);background:var(--mummy-light);color:var(--mummy);}.player-btn[data-p="Jayden"]:hover,.player-btn[data-p="Jayden"].active{border-color:var(--jayden);background:var(--jayden-light);color:var(--jayden);}.player-btn[data-p="Daddy"].active .chip{background:var(--daddy);color:#fff;}.player-btn[data-p="Mummy"].active .chip{background:var(--mummy);color:#fff;}.player-btn[data-p="Jayden"].active .chip{background:var(--jayden);color:#fff;}.lb-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}.lb-rows{display:flex;flex-direction:column;gap:7px;}.lb-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;background:var(--paper);}.lb-row.r-Daddy{background:var(--daddy-light);}.lb-row.r-Mummy{background:var(--mummy-light);}.lb-row.r-Jayden{background:var(--jayden-light);}.lb-rank{font-size:.95rem;width:20px;text-align:center;flex-shrink:0;}.lb-av{font-size:1.15rem;flex-shrink:0;}.lb-name{font-weight:700;font-size:.85rem;flex:1;}.lb-name.c-Daddy{color:var(--daddy);}.lb-name.c-Mummy{color:var(--mummy);}.lb-name.c-Jayden{color:var(--jayden);}.lb-bar-wrap{width:60px;height:5px;background:var(--border);border-radius:99px;overflow:hidden;flex-shrink:0;}.lb-bar{height:100%;border-radius:99px;transition:width .4s;}.b-Daddy{background:var(--daddy);}.b-Mummy{background:var(--mummy);}.b-Jayden{background:var(--jayden);}.lb-stats{font-size:.72rem;color:var(--muted);text-align:right;line-height:1.4;}.lb-stats strong{color:var(--ink);}.comp-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;}.comp-icon{font-size:1.5rem;}.comp-title{font-family:'Lora',serif;font-size:1.15rem;font-weight:600;}.comp-subtitle{font-size:.8rem;color:var(--muted);}.comp-badge{font-size:.7rem;font-weight:700;padding:3px 9px;border-radius:99px;background:var(--accent-light);color:var(--accent);border:1px solid #b2d8d0;}.topic-section{font-size:.65rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin:10px 0 6px;}.topic-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px;}.topic-chip{padding:5px 12px;border-radius:99px;font-size:.78rem;border:1.5px solid var(--border);background:var(--paper);color:var(--ink);font-weight:500;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;}.topic-chip:hover,.topic-chip.active{background:var(--accent);color:#fff;border-color:var(--accent);}.topic-chip.hard{border-color:#f0c8c4;}.topic-chip.hard:hover,.topic-chip.hard.active{background:var(--red);border-color:var(--red);color:#fff;}.gen-bar{display:flex;gap:8px;margin:16px 0;}.quiz-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}.meta-pill{font-size:.72rem;font-weight:500;color:var(--muted);background:#fff;border:1px solid var(--border);padding:3px 10px;border-radius:99px;}.player-pill{font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:99px;color:#fff;}.pp-Daddy{background:var(--daddy);}.pp-Mummy{background:var(--mummy);}.pp-Jayden{background:var(--jayden);}.passage-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:22px 24px;margin-bottom:18px;font-family:'Lora',serif;font-size:1rem;}.passage-card h3{font-family:'Inter',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}.passage-card p{line-height:2.1;margin-bottom:12px;}.passage-card p:last-child{margin-bottom:0;}.blank-wrap{display:inline-block;position:relative;vertical-align:middle;margin:0 2px;}.blank-num{display:block;font-family:'Inter',sans-serif;font-size:.52rem;font-weight:700;color:var(--accent);text-align:center;line-height:1;margin-bottom:1px;}.blank-input{display:block;width:105px;border:none;border-bottom:2px solid var(--border);background:transparent;font-family:'Lora',serif;font-size:.95rem;color:var(--ink);text-align:center;padding:0 3px 2px;outline:none;transition:border-color .15s;}.blank-input:focus{border-bottom-color:var(--accent);}.blank-input.correct{border-bottom-color:var(--accent);color:var(--accent);}.blank-input.wrong{border-bottom-color:var(--red);color:var(--red);text-decoration:line-through;}.blank-input.revealed{border-bottom-color:var(--gold);color:var(--gold);}.blank-input:disabled{cursor:default;}.blank-hint{position:absolute;left:50%;transform:translateX(-50%);top:calc(100% + 1px);font-family:'Inter',sans-serif;font-size:.57rem;font-weight:700;white-space:nowrap;pointer-events:none;}.blank-hint.correct{color:var(--accent);}.blank-hint.wrong{color:var(--gold);}.question-block{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:12px;}.question-block .q-label{font-size:.65rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}.question-block .q-text{font-family:'Lora',serif;font-size:.98rem;line-height:1.7;margin-bottom:14px;}.question-block .q-text .blank{display:inline-block;width:90px;border-bottom:2px solid var(--border);vertical-align:bottom;text-align:center;font-style:italic;color:var(--muted);}.options{display:flex;flex-direction:column;gap:7px;}.option-btn{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--paper);cursor:pointer;font-family:'Inter',sans-serif;font-size:.88rem;text-align:left;transition:all .15s;font-weight:400;}.option-btn:hover:not(:disabled){border-color:var(--accent);background:var(--accent-light);}.option-btn.selected{border-color:var(--accent);background:var(--accent-light);}.option-btn.correct{border-color:var(--accent);background:#f0fdf9;color:var(--accent);font-weight:600;}.option-btn.wrong{border-color:var(--red);background:var(--red-light);color:var(--red);}.option-btn.show-correct{border-color:var(--accent);background:#f0fdf9;}.option-label{width:20px;height:20px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0;}.option-btn.correct .option-label{background:var(--accent);color:#fff;}.option-btn.wrong .option-label{background:var(--red);color:#fff;}.option-btn.show-correct .option-label{background:var(--accent);color:#fff;}.q-explanation{margin-top:10px;padding:10px 12px;background:var(--paper);border-radius:7px;font-size:.82rem;color:var(--muted);line-height:1.5;display:none;}.q-explanation.show{display:block;}.editing-passage{background:#fff;border:1px solid var(--border);border-radius:10px;padding:22px 24px;margin-bottom:18px;font-family:'Lora',serif;font-size:1rem;line-height:2.0;}.editing-passage h3{font-family:'Inter',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}.underlined-word{display:inline-flex;flex-direction:column;align-items:center;cursor:pointer;margin:0 1px;}.uw-text{border-bottom:2px solid var(--ink);padding:0 2px;}.uw-num{font-family:'Inter',sans-serif;font-size:.52rem;font-weight:700;color:var(--muted);}.edit-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;background:var(--paper);margin-bottom:7px;}.edit-num{font-size:.7rem;font-weight:700;color:var(--muted);width:20px;flex-shrink:0;}.edit-word{font-family:'Lora',serif;font-size:.95rem;font-weight:600;width:100px;flex-shrink:0;}.edit-input{flex:1;border:none;border-bottom:1.5px solid var(--border);background:transparent;font-family:'Lora',serif;font-size:.93rem;padding:2px 4px;outline:none;}.edit-input:focus{border-bottom-color:var(--accent);}.edit-input.correct{color:var(--accent);border-bottom-color:var(--accent);}.edit-input.wrong{color:var(--red);border-bottom-color:var(--red);text-decoration:line-through;}.edit-input.ok{color:var(--muted);font-style:italic;}.edit-tag{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:4px;flex-shrink:0;}.edit-tag.correct{background:var(--accent-light);color:var(--accent);}.edit-tag.wrong{background:var(--red-light);color:var(--red);}.edit-tag.ok{background:#f1f5f9;color:#475569;}.no-error-row{font-size:.78rem;color:var(--muted);font-style:italic;}.st-block{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:12px;}.st-sentences{background:var(--paper);border-radius:7px;padding:12px 14px;margin-bottom:12px;font-family:'Lora',serif;font-size:.95rem;line-height:1.8;}.st-sentence{margin-bottom:4px;}.st-sentence:last-child{margin-bottom:0;}.st-instruction{font-size:.8rem;color:var(--muted);margin-bottom:10px;font-weight:500;}.st-instruction strong{color:var(--accent);}.st-stem{font-family:'Lora',serif;font-size:.95rem;margin-bottom:10px;line-height:1.7;}.st-input{width:100%;border:1.5px solid var(--border);border-radius:7px;padding:9px 12px;font-family:'Lora',serif;font-size:.93rem;outline:none;background:#fff;resize:vertical;min-height:42px;}.st-input:focus{border-color:var(--accent);}.st-input.correct{border-color:var(--accent);background:#f0fdf9;}.st-input.wrong{border-color:var(--red);background:var(--red-light);}.st-feedback{margin-top:8px;font-size:.82rem;line-height:1.5;display:none;}.st-feedback.show{display:block;}.st-answer{color:var(--accent);font-weight:600;}.st-alt{color:var(--muted);font-size:.78rem;}.word-bank{background:var(--accent-light);border:1px solid #b2d8d0;border-radius:8px;padding:12px 14px;margin-bottom:14px;}.word-bank-title{font-size:.65rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}.word-bank-words{display:flex;flex-wrap:wrap;gap:6px;}.wb-word{padding:4px 10px;background:#fff;border:1px solid #b2d8d0;border-radius:99px;font-family:'Lora',serif;font-size:.88rem;cursor:pointer;transition:all .15s;}.wb-word:hover{background:var(--accent);color:#fff;border-color:var(--accent);}.wb-word.used{opacity:.4;text-decoration:line-through;cursor:default;}.score-card{border-radius:10px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:16px;}.sc-Daddy{background:var(--daddy-light);border:1px solid #bfdbfe;}.sc-Mummy{background:var(--mummy-light);border:1px solid #e9d5ff;}.sc-Jayden{background:var(--jayden-light);border:1px solid #fed7aa;}.score-big{font-family:'Lora',serif;font-size:2.6rem;font-weight:600;line-height:1;flex-shrink:0;}.sb-Daddy{color:var(--daddy);}.sb-Mummy{color:var(--mummy);}.sb-Jayden{color:var(--jayden);}.score-detail{font-size:.85rem;color:var(--ink);line-height:1.65;}.review-wrap{margin-top:16px;overflow-x:auto;}.review-table{width:100%;border-collapse:collapse;font-size:.8rem;}.review-table th{text-align:left;padding:7px 10px;background:var(--paper);font-weight:700;font-size:.68rem;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--border);}.review-table td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top;}.review-table tr.rr-correct td{background:#f0fdf9;}.review-table tr.rr-wrong td{background:#fff8f0;}.tag-c{display:inline-block;background:var(--accent-light);color:var(--accent);font-size:.62rem;font-weight:700;padding:1px 5px;border-radius:3px;}.tag-w{display:inline-block;background:var(--red-light);color:var(--red);font-size:.62rem;font-weight:700;padding:1px 5px;border-radius:3px;}.accepted-ans{color:var(--accent);font-weight:600;}.quiz-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}#status-msg{font-size:.8rem;color:var(--muted);min-height:18px;}.loading-state{text-align:center;padding:40px 20px;}.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}@keyframes spin{to{transform:rotate(360deg);}}.loading-state p{color:var(--muted);font-size:.87rem;}.error-state{background:var(--red-light);border:1px solid #f0c8c4;border-radius:10px;padding:16px 18px;color:var(--red);font-size:.87rem;margin-bottom:16px;}.hint-toggle{font-size:.75rem;color:var(--accent);background:none;border:none;padding:0;cursor:pointer;font-weight:600;font-family:'Inter',sans-serif;margin-bottom:10px;}.hint-panel{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:.8rem;line-height:1.65;color:#78350f;}.notice{background:var(--jayden-light);border:1px solid #fed7aa;border-radius:8px;padding:10px 14px;font-size:.83rem;color:#9a3412;margin-bottom:14px;display:none;}.app-footer{border-top:1px solid var(--border);padding:14px 20px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;background:#fff;}@media(max-width:600px){.sidebar{display:none;}.mobile-nav{display:flex;overflow-x:auto;gap:0;background:#fff;border-bottom:1px solid var(--border);-webkit-overflow-scrolling:touch;}.mobile-nav-btn{flex-shrink:0;padding:10px 14px;font-size:.78rem;font-weight:600;border:none;border-bottom:3px solid transparent;background:none;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;}.mobile-nav-btn.active{color:var(--accent);border-bottom-color:var(--accent);}.content{padding:16px 14px 50px;}}@media(min-width:601px){.mobile-nav{display:none;}}</style>
 </head>
 <body>
 
 <header>
-  <span style="font-size:1.2rem">&#x1F4D6;</span>
-  <span class="logo">Family Cloze Challenge</span>
-  <span class="badge">PSLE Prep &middot; v5</span>
+  <span style="font-size:1.1rem">📚</span>
+  <span class="logo">PSLE English Master</span>
+  <span class="badge">Paper 2 · 2025</span>
 </header>
 
-<!-- Firebase Setup Screen -->
-<div id="firebase-setup" style="display:none">
-  <div style="max-width:520px;margin:40px auto;padding:0 20px;">
-    <div style="background:white;border:1px solid var(--border);border-radius:14px;padding:32px 28px;">
-      <div style="font-size:2.2rem;margin-bottom:10px;text-align:center">&#x2601;&#xFE0F;</div>
-      <h2 style="font-family:'Lora',serif;font-size:1.2rem;margin-bottom:6px;text-align:center">Set up Cloud Scores</h2>
-      <p style="font-size:.85rem;color:var(--muted);margin-bottom:20px;line-height:1.6;text-align:center">Scores sync across all devices in real time using Firebase (free).</p>
-      <div style="background:var(--paper);border-radius:8px;padding:14px 16px;font-size:.82rem;line-height:1.9;margin-bottom:20px;">
+<!-- Firebase Setup -->
+<div id="screen-firebase" style="display:none">
+  <div class="setup-wrap">
+    <div class="setup-card">
+      <div style="font-size:2rem;text-align:center;margin-bottom:10px">☁️</div>
+      <h2>Set up Cloud Scores</h2>
+      <p>Scores sync across all devices in real time (free via Firebase).</p>
+      <div class="setup-steps">
         <strong>5-minute setup:</strong><br>
         1. Go to <a href="https://console.firebase.google.com" target="_blank" style="color:var(--accent)">console.firebase.google.com</a><br>
-        2. Click <strong>Add project</strong> &rarr; name it <em>psle-cloze</em> &rarr; Create<br>
-        3. Left menu &rarr; <strong>Build &rarr; Realtime Database</strong><br>
-        4. Click <strong>Create Database</strong> &rarr; any region &rarr; <strong>Start in test mode</strong> &rarr; Enable<br>
-        5. Copy the URL shown (like <code style="background:#e2e8f0;padding:1px 5px;border-radius:3px">https://psle-cloze-xxxxx-default-rtdb.firebaseio.com</code>)<br>
-        6. Paste it below
+        2. Add project → name it <em>psle-master</em> → Create<br>
+        3. Left menu → Build → Realtime Database<br>
+        4. Create Database → any region → <strong>Start in test mode</strong> → Enable<br>
+        5. Copy the URL shown (ends in .firebaseio.com or .firebasedatabase.app)<br>
+        6. Paste below
       </div>
-      <input id="firebase-url-input" type="url"
-        placeholder="https://your-project-default-rtdb.firebaseio.com"
-        style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.85rem;margin-bottom:8px;outline:none;"
-        onkeydown="if(event.key==='Enter') submitFirebaseUrl()" />
-      <div id="firebase-url-error" style="color:var(--red);font-size:.78rem;margin-bottom:10px;min-height:16px;"></div>
-      <button class="btn-primary" style="width:100%;padding:12px;margin-bottom:10px;" onclick="submitFirebaseUrl()">Save &amp; Continue</button>
-      <button class="btn-secondary" style="width:100%;padding:10px;font-size:.82rem;" onclick="skipFirebase()">Skip &mdash; use this device only (no cloud sync)</button>
+      <input class="setup-input" id="fb-url-input" type="url" placeholder="https://psle-master-xxxxx-default-rtdb.firebaseio.com" onkeydown="if(event.key==='Enter')submitFbUrl()"/>
+      <div class="setup-error" id="fb-url-err"></div>
+      <button class="btn-primary btn-full" onclick="submitFbUrl()">Save &amp; Continue</button>
+      <button class="btn-secondary btn-full" onclick="skipFb()">Skip — local device only</button>
     </div>
   </div>
 </div>
 
-<!-- API Key Setup Screen -->
-<div id="api-setup" style="display:none">
-  <div style="max-width:480px;margin:60px auto;padding:0 20px;">
-    <div style="background:white;border:1px solid var(--border);border-radius:14px;padding:32px 28px;text-align:center;">
-      <div style="font-size:2.5rem;margin-bottom:12px;">&#x1F511;</div>
-      <h2 style="font-family:'Lora',serif;font-size:1.3rem;margin-bottom:8px;">Enter your API Key</h2>
-      <p style="font-size:.87rem;color:var(--muted);margin-bottom:24px;line-height:1.6;">
-        Get your key from <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent)">console.anthropic.com</a> &rarr; API Keys.<br>
-        <strong>Saved only in this browser &mdash; never shared.</strong>
-      </p>
-      <input id="api-key-input" type="password" placeholder="sk-ant-..."
-        style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:.9rem;margin-bottom:10px;outline:none;"
-        onkeydown="if(event.key==='Enter') submitApiKey()" />
-      <div id="api-key-error" style="color:var(--red);font-size:.8rem;margin-bottom:10px;min-height:18px;"></div>
-      <button class="btn-primary" style="width:100%;padding:12px;" onclick="submitApiKey()">Save &amp; Start Quiz</button>
-      <p style="font-size:.75rem;color:var(--muted);margin-top:16px;">Each quiz costs ~$0.01 USD in API credits.</p>
+<!-- API Key Setup -->
+<div id="screen-api" style="display:none">
+  <div class="setup-wrap">
+    <div class="setup-card">
+      <div style="font-size:2rem;text-align:center;margin-bottom:10px">🔑</div>
+      <h2>Enter your Anthropic API Key</h2>
+      <p>Get yours from <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent)">console.anthropic.com</a> → API Keys.<br><strong>Saved only in this browser.</strong></p>
+      <input class="setup-input" id="api-key-input" type="password" placeholder="sk-ant-..." onkeydown="if(event.key==='Enter')submitApiKey()"/>
+      <div class="setup-error" id="api-key-err"></div>
+      <button class="btn-primary btn-full" onclick="submitApiKey()">Save &amp; Start</button>
+      <p style="font-size:.72rem;color:var(--muted);text-align:center;margin-top:12px">~$0.01 per quiz generated</p>
     </div>
   </div>
 </div>
 
 <!-- Main App -->
-<div id="main-content" style="display:none">
-<div class="container">
+<div id="screen-app" style="display:none">
+  <!-- Mobile nav -->
+  <div class="mobile-nav" id="mobile-nav"></div>
 
-  <!-- Player -->
-  <div class="card">
-    <div class="card-title">Who's playing?</div>
-    <div class="player-grid">
-      <button class="player-btn" data-p="Daddy" onclick="selectPlayer('Daddy')">
-        <span class="av">👨</span><span>Daddy</span>
-        <span class="chip" id="chip-Daddy">0 played</span>
-      </button>
-      <button class="player-btn" data-p="Mummy" onclick="selectPlayer('Mummy')">
-        <span class="av">👩</span><span>Mummy</span>
-        <span class="chip" id="chip-Mummy">0 played</span>
-      </button>
-      <button class="player-btn" data-p="Jayden" onclick="selectPlayer('Jayden')">
-        <span class="av">👦</span><span>Jayden</span>
-        <span class="chip" id="chip-Jayden">0 played</span>
-      </button>
+  <div class="app">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar"></div>
+
+    <!-- Content -->
+    <div class="content">
+      <div class="content-inner">
+
+        <!-- Player + Leaderboard -->
+        <div class="card">
+          <div class="card-title">Who's playing?</div>
+          <div class="player-grid">
+            <button class="player-btn" data-p="Daddy" onclick="selectPlayer('Daddy')">
+              <span class="av">👨</span><span>Daddy</span><span class="chip" id="chip-Daddy">0</span>
+            </button>
+            <button class="player-btn" data-p="Mummy" onclick="selectPlayer('Mummy')">
+              <span class="av">👩</span><span>Mummy</span><span class="chip" id="chip-Mummy">0</span>
+            </button>
+            <button class="player-btn" data-p="Jayden" onclick="selectPlayer('Jayden')">
+              <span class="av">👦</span><span>Jayden</span><span class="chip" id="chip-Jayden">0</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="lb-header">
+            <div class="card-title" style="margin-bottom:0">🏆 Leaderboard</div>
+            <button class="btn-secondary btn-sm" onclick="confirmReset()">Reset</button>
+          </div>
+          <div class="lb-rows" id="lb-rows">
+            <div style="font-size:.82rem;color:var(--muted);text-align:center;padding:6px 0">No scores yet!</div>
+          </div>
+        </div>
+
+        <!-- Component Panel -->
+        <div id="comp-panel"></div>
+
+      </div>
     </div>
   </div>
 
-
-  <!-- Leaderboard -->
-  <div class="card">
-    <div class="lb-header">
-      <div class="card-title" style="margin-bottom:0">🏆 Leaderboard</div>
-      <button class="lb-reset" onclick="confirmReset()">Reset scores</button>
-    </div>
-    <div class="lb-rows" id="lb-rows">
-      <div style="font-size:.85rem;color:var(--muted);text-align:center;padding:8px 0">No scores yet — play a quiz!</div>
-    </div>
+  <div class="app-footer">
+    <button class="btn-secondary btn-sm" onclick="resetApiKey()">🔑 Change API Key</button>
+    <button class="btn-secondary btn-sm" onclick="resetFb()">☁️ Change Firebase</button>
   </div>
-
-
-<!-- Topics -->
-  <div class="card">
-    <div class="card-title">Choose a topic</div>
-
-    <div class="topic-section-label">🇸🇬 Singapore &amp; Society</div>
-    <div class="topic-grid">
-      <button class="topic-btn active" data-topic="wet markets and hawker culture in Singapore" data-label="Wet Markets">Wet Markets</button>
-      <button class="topic-btn" data-topic="Singapore's kampong spirit and community living" data-label="Kampong Spirit">Kampong Spirit</button>
-      <button class="topic-btn" data-topic="Singapore's multiracial festivals and traditions" data-label="Festivals">Festivals</button>
-      <button class="topic-btn" data-topic="volunteering and community service in Singapore" data-label="Volunteering">Volunteering</button>
-      <button class="topic-btn" data-topic="Singapore's public transport system (MRT and buses)" data-label="Public Transport">Public Transport</button>
-      <button class="topic-btn" data-topic="the history and significance of the Singapore Botanic Gardens" data-label="Botanic Gardens">Botanic Gardens</button>
-      <button class="topic-btn" data-topic="National Service and its importance to Singapore" data-label="National Service">National Service</button>
-      <button class="topic-btn" data-topic="Singapore's journey from fishing village to modern city" data-label="Singapore History">SG History</button>
-      <button class="topic-btn" data-topic="Sentosa island as a leisure and heritage destination" data-label="Sentosa">Sentosa</button>
-      <button class="topic-btn" data-topic="the importance of neighbourliness and HDB community life" data-label="HDB Life">HDB Life</button>
-    </div>
-
-    <div class="topic-section-label">🐾 Animals &amp; Nature</div>
-    <div class="topic-grid">
-      <button class="topic-btn" data-topic="human-animal relationships and working animals" data-label="Human &amp; Animals">Human &amp; Animals</button>
-      <button class="topic-btn" data-topic="army ants and their colony behaviour" data-label="Army Ants">Army Ants</button>
-      <button class="topic-btn" data-topic="honeybees and the importance of pollination" data-label="Honeybees">Honeybees</button>
-      <button class="topic-btn" data-topic="lizards and reptiles and their survival adaptations" data-label="Reptiles">Reptiles</button>
-      <button class="topic-btn" data-topic="marine life and ocean conservation" data-label="Marine Life">Marine Life</button>
-      <button class="topic-btn" data-topic="rainforest biodiversity and endangered animals" data-label="Rainforest">Rainforest</button>
-      <button class="topic-btn" data-topic="migratory birds and their navigation instincts" data-label="Migratory Birds">Migratory Birds</button>
-      <button class="topic-btn" data-topic="elephants and their social behaviour in the wild" data-label="Elephants">Elephants</button>
-      <button class="topic-btn" data-topic="sharks and their role in the ocean ecosystem" data-label="Sharks">Sharks</button>
-      <button class="topic-btn" data-topic="cheetahs and their hunting adaptations on the savannah" data-label="Cheetahs">Cheetahs</button>
-      <button class="topic-btn" data-topic="dogs as working animals — guide dogs, rescue dogs, police dogs" data-label="Working Dogs">Working Dogs</button>
-      <button class="topic-btn" data-topic="the life cycle and silk production of silkworms" data-label="Silkworms">Silkworms</button>
-    </div>
-
-    <div class="topic-section-label">🌿 Health, Science &amp; Environment</div>
-    <div class="topic-grid">
-      <button class="topic-btn" data-topic="dental hygiene and healthy habits for children" data-label="Dental Health">Dental Health</button>
-      <button class="topic-btn" data-topic="the importance of sleep for growing children" data-label="Sleep">Sleep</button>
-      <button class="topic-btn" data-topic="water conservation and Singapore's water supply" data-label="Water">Water</button>
-      <button class="topic-btn" data-topic="recycling and managing waste in Singapore" data-label="Recycling">Recycling</button>
-      <button class="topic-btn" data-topic="climate change and its effects on our daily lives" data-label="Climate Change">Climate Change</button>
-      <button class="topic-btn" data-topic="the human digestive system and nutrition" data-label="Nutrition">Nutrition</button>
-      <button class="topic-btn" data-topic="exercise and its benefits for the body and mind" data-label="Exercise">Exercise</button>
-      <button class="topic-btn" data-topic="how vaccines protect us from infectious diseases" data-label="Vaccines">Vaccines</button>
-      <button class="topic-btn" data-topic="urban farming and growing food in cities" data-label="Urban Farming">Urban Farming</button>
-      <button class="topic-btn" data-topic="the water cycle and how rain is formed" data-label="Water Cycle">Water Cycle</button>
-      <button class="topic-btn" data-topic="the importance of trees and forests to the environment" data-label="Forests">Forests</button>
-      <button class="topic-btn" data-topic="plastic pollution and its impact on oceans" data-label="Plastic Pollution">Plastic Pollution</button>
-    </div>
-
-    <div class="topic-section-label">🚀 Technology &amp; Innovation</div>
-    <div class="topic-grid">
-      <button class="topic-btn" data-topic="robots and artificial intelligence in everyday life" data-label="Robots &amp; AI">Robots &amp; AI</button>
-      <button class="topic-btn" data-topic="the history of a famous invention like the telephone" data-label="Inventions">Inventions</button>
-      <button class="topic-btn" data-topic="responsible use of smartphones and social media" data-label="Smartphones">Smartphones</button>
-      <button class="topic-btn" data-topic="electric vehicles and the future of transport" data-label="Electric Cars">Electric Cars</button>
-      <button class="topic-btn" data-topic="how satellites help us with navigation and weather forecasting" data-label="Satellites">Satellites</button>
-      <button class="topic-btn" data-topic="3D printing and how it is changing manufacturing" data-label="3D Printing">3D Printing</button>
-      <button class="topic-btn" data-topic="drones and their uses in delivery, farming and rescue" data-label="Drones">Drones</button>
-      <button class="topic-btn" data-topic="the internet and how it connects the world" data-label="The Internet">The Internet</button>
-    </div>
-
-    <div class="topic-section-label">🎭 Culture, People &amp; Values</div>
-    <div class="topic-grid">
-      <button class="topic-btn" data-topic="a young person overcoming a personal challenge through perseverance" data-label="Perseverance">Perseverance</button>
-      <button class="topic-btn" data-topic="the importance of reading and libraries" data-label="Reading">Reading</button>
-      <button class="topic-btn" data-topic="sports values like teamwork and sportsmanship" data-label="Sports Values">Sports Values</button>
-      <button class="topic-btn" data-topic="cooking traditional food and preserving recipes" data-label="Traditional Food">Traditional Food</button>
-      <button class="topic-btn" data-topic="gardening and the benefits of growing your own vegetables" data-label="Gardening">Gardening</button>
-      <button class="topic-btn" data-topic="the value of kindness and helping those in need" data-label="Kindness">Kindness</button>
-      <button class="topic-btn" data-topic="the role of grandparents in family life and passing down wisdom" data-label="Grandparents">Grandparents</button>
-      <button class="topic-btn" data-topic="money management and saving habits for children" data-label="Saving Money">Saving Money</button>
-      <button class="topic-btn" data-topic="the history and culture of the Olympics" data-label="Olympics">Olympics</button>
-      <button class="topic-btn" data-topic="the art of calligraphy and its cultural heritage" data-label="Calligraphy">Calligraphy</button>
-    </div>
-
-    <div class="topic-section-label">🌍 World &amp; Geography</div>
-    <div class="topic-grid">
-      <button class="topic-btn" data-topic="the Amazon rainforest and its importance to the planet" data-label="Amazon">Amazon</button>
-      <button class="topic-btn" data-topic="deserts of the world and how animals survive in them" data-label="Deserts">Deserts</button>
-      <button class="topic-btn" data-topic="volcanoes and how they are formed" data-label="Volcanoes">Volcanoes</button>
-      <button class="topic-btn" data-topic="life at the polar regions — the Arctic and Antarctic" data-label="Polar Regions">Polar Regions</button>
-      <button class="topic-btn" data-topic="the Great Barrier Reef and coral conservation" data-label="Coral Reefs">Coral Reefs</button>
-      <button class="topic-btn" data-topic="how mountains are formed and the challenges of climbing them" data-label="Mountains">Mountains</button>
-    </div>
-
-    <div class="topic-section-label">🔴 Harder (AL1–AL2 challenge)</div>
-    <div class="topic-grid">
-      <button class="topic-btn hard" data-topic="bioluminescence in deep sea creatures" data-label="Bioluminescence">Bioluminescence</button>
-      <button class="topic-btn hard" data-topic="the Great Wildebeest Migration on the Serengeti" data-label="Serengeti Migration">Serengeti Migration</button>
-      <button class="topic-btn hard" data-topic="Singapore's NEWater treatment technology" data-label="NEWater">NEWater</button>
-      <button class="topic-btn hard" data-topic="the placebo effect and how the mind affects healing" data-label="Placebo Effect">Placebo Effect</button>
-      <button class="topic-btn hard" data-topic="echolocation in bats and dolphins" data-label="Echolocation">Echolocation</button>
-      <button class="topic-btn hard" data-topic="camouflage and mimicry as survival strategies in nature" data-label="Camouflage">Camouflage</button>
-      <button class="topic-btn hard" data-topic="photosynthesis and how plants produce energy from sunlight" data-label="Photosynthesis">Photosynthesis</button>
-      <button class="topic-btn hard" data-topic="the science of sleep and why we dream" data-label="Dreams &amp; Sleep">Dreams &amp; Sleep</button>
-      <button class="topic-btn hard" data-topic="ocean currents and their effect on global climate" data-label="Ocean Currents">Ocean Currents</button>
-      <button class="topic-btn hard" data-topic="the human brain and how memory works" data-label="Memory &amp; Brain">Memory &amp; Brain</button>
-    </div>
-
-    <div class="difficulty-legend">
-      <span><span class="legend-dot" style="background:var(--accent)"></span>Standard (AL3–AL4)</span>
-      <span><span class="legend-dot" style="background:#c0392b"></span>Harder (AL1–AL2)</span>
-    </div>
-  </div>
-
-
-
-  <div class="notice" id="notice">&#x261D;&#xFE0F; Please select a player above before generating a quiz.</div>
-
-  <div class="gen-bar">
-    <button class="btn-primary" id="gen-btn" onclick="generateQuiz()">&#x1F3B2; Generate Quiz</button>
-    <button class="btn-secondary" id="random-btn" onclick="pickRandom()">&#x1F500; Surprise Me</button>
-  </div>
-
-  <div id="quiz-area"></div>
-</div><!-- end container -->
-
-<div style="text-align:center;padding:20px 0 40px;border-top:1px solid var(--border);margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-  <button class="btn-secondary" style="font-size:.78rem;padding:6px 14px;color:var(--muted);" onclick="resetApiKey()">&#x1F511; Change API Key</button>
-  <button class="btn-secondary" style="font-size:.78rem;padding:6px 14px;color:var(--muted);" onclick="resetFirebase()">&#x2601;&#xFE0F; Change Firebase URL</button>
 </div>
 
-</div><!-- end main-content -->
-
-<script>
-const PLAYERS = ['Daddy','Mummy','Jayden'];
-const AVATARS = {Daddy:'\u{1F468}',Mummy:'\u{1F469}',Jayden:'\u{1F466}'};
-const MEDALS  = ['\u{1F947}','\u{1F948}','\u{1F949}'];
-
+<script>const PLAYERS = ['Daddy','Mummy','Jayden'];
+const AVATARS = {Daddy:'👨',Mummy:'👩',Jayden:'👦'};
+const MEDALS  = ['🥇','🥈','🥉'];
+const FB_KEY      = 'psle-master-v1-fb-url';
+const API_KEY_KEY = 'psle-master-v1-api-key';
+const LOCAL_KEY   = 'psle-master-v1-local-scores';
+const COMPONENTS = [
+  { id:'grammar-mcq',    icon:'📝', label:'Grammar MCQ',        marks:10, desc:'10 MCQ · 10 marks' },
+  { id:'vocab-mcq',      icon:'📖', label:'Vocabulary MCQ',     marks:5,  desc:'5 MCQ · 5 marks' },
+  { id:'vocab-cloze',    icon:'🔤', label:'Vocabulary Cloze',   marks:5,  desc:'5 MCQ · 5 marks' },
+  { id:'grammar-cloze',  icon:'✏️', label:'Grammar Cloze',      marks:10, desc:'10 blanks · word bank' },
+  { id:'editing',        icon:'🔍', label:'Editing',            marks:10, desc:'10 underlined words' },
+  { id:'comprehension',  icon:'📄', label:'Comprehension Cloze',marks:15, desc:'15 blanks · free write' },
+  { id:'synthesis',      icon:'🔗', label:'Synthesis & Trans.',  marks:10, desc:'5 questions · 2 marks each' },
+];
+const TOPICS = {
+  'grammar-mcq': {
+    'Core Grammar': [
+      'Subject-Verb Agreement with collective nouns and indefinite pronouns',
+      'Tenses: simple past vs present perfect vs past perfect',
+      'Question tags (positive and negative)',
+      'Active and passive voice transformation',
+      'Reported speech: statements, questions and commands',
+      'Gerunds and infinitives after verbs',
+      'Modal verbs: should, must, might, could, would',
+      'Relative pronouns: who, which, whose, whom',
+      'Conditionals: if-clauses and unless',
+      'Articles: a, an, the and zero article',
+    ],
+    'Tricky Grammar': [
+      'Neither/either with singular and plural verbs',
+      'Quantifiers: few, little, many, much, several',
+      'Participle phrases and dangling modifiers',
+      'Conjunctions: although, despite, however, nevertheless',
+      'Pronoun-antecedent agreement',
+      'Verb patterns: verb + noun + verb (e.g. make him do)',
+      'Had better / would rather constructions',
+      'Prepositions of time, place and movement',
+    ],
+  },
+  'vocab-mcq': {
+    'Word Meaning in Context': [
+      'Verbs of movement and action (sprint, trudge, amble)',
+      'Adjectives describing character and emotion',
+      'Nouns for abstract concepts (diligence, perseverance)',
+      'Words commonly confused (affect/effect, principal/principle)',
+      'Phrasal verbs in context (bring about, set off, give in)',
+      'Words with multiple meanings (fine, mean, fair)',
+      'Academic and newspaper vocabulary',
+      'Singapore context vocabulary (kampong, hawker, heartland)',
+    ],
+    'Vocabulary Nuances': [
+      'Near-synonyms: delighted vs pleased vs content',
+      'Formal vs informal register choices',
+      'Words describing difficulty: challenging, demanding, arduous',
+      'Words for communication: murmured, announced, proclaimed',
+      'Environmental vocabulary: conserve, preserve, sustain',
+      'Words for movement: crept, darted, trudged, staggered',
+    ],
+  },
+  'vocab-cloze': {
+    'Passage Topics': [
+      'A nature documentary passage about animals',
+      'A newspaper article about community events in Singapore',
+      'An informational passage about food and cooking',
+      'A science article about environmental conservation',
+      'A narrative passage about a school experience',
+      'A travel article about a Singapore landmark',
+      'An article about technology and its effects',
+      'A passage about sports and teamwork',
+      'An article about health and healthy habits',
+      'A historical passage about Singapore',
+    ],
+  },
+  'grammar-cloze': {
+    'Grammar Focuses': [
+      'Mixed tenses in a narrative passage',
+      'Prepositions of time and place throughout a passage',
+      'Pronouns and pronoun-antecedent agreement',
+      'Modal verbs and auxiliary verbs',
+      'Articles and determiners',
+      'Conjunctions and connectors in an informational text',
+      'Passive voice constructions',
+      'Gerunds and infinitives in context',
+      'Reported speech elements',
+      'Mixed grammar in a descriptive passage',
+    ],
+  },
+  'editing': {
+    'Error Types': [
+      'Subject-verb agreement errors in a narrative',
+      'Tense errors in a recount passage',
+      'Spelling errors: commonly misspelled P6 words',
+      'Pronoun errors and word form errors',
+      'Preposition and article errors',
+      'Mixed grammar and spelling in a factual passage',
+      'Errors in a letter or email passage',
+      'Errors in a dialogue passage',
+      'Word form errors (noun/verb/adjective confusion)',
+      'Mixed error types in a Singapore context passage',
+    ],
+  },
+  'comprehension': {
+    '🇸🇬 Singapore': [
+      'Wet markets and hawker culture in Singapore',
+      "Singapore's kampong spirit and community living",
+      "Singapore's multiracial festivals and traditions",
+      'Volunteering and community service in Singapore',
+      "Singapore's public transport (MRT and buses)",
+      'Sentosa island as a leisure and heritage destination',
+      "Singapore's journey from fishing village to modern city",
+      'The Singapore Botanic Gardens and nature conservation',
+      'HDB community life and neighbourliness',
+      'National Service and its importance to Singapore',
+    ],
+    '🐾 Animals & Nature': [
+      'Human-animal relationships and working animals',
+      'Army ants and their colony behaviour',
+      'Honeybees and the importance of pollination',
+      'Lizards and reptiles and their survival adaptations',
+      'Marine life and ocean conservation',
+      'Rainforest biodiversity and endangered animals',
+      'Migratory birds and their navigation instincts',
+      'Elephants and their social behaviour in the wild',
+      'Dogs as working animals: guide, rescue, police',
+      'Sharks and their role in the ocean ecosystem',
+    ],
+    '🌿 Health & Science': [
+      'Dental hygiene and healthy habits for children',
+      'The importance of sleep for growing children',
+      'Water conservation and Singapore\'s water supply',
+      'Recycling and managing waste in Singapore',
+      'Climate change and its effects on daily life',
+      'The human digestive system and nutrition',
+      'Exercise and its benefits for body and mind',
+      'How vaccines protect us from infectious diseases',
+      'Urban farming and growing food in cities',
+      'Plastic pollution and its impact on oceans',
+    ],
+    '🚀 Technology': [
+      'Robots and artificial intelligence in everyday life',
+      'The history of a famous invention (telephone, printing press)',
+      'Responsible use of smartphones and social media',
+      'Electric vehicles and the future of transport',
+      'How satellites help with navigation and weather',
+      'Drones and their uses in delivery and rescue',
+      '3D printing and how it is changing manufacturing',
+      'The internet and how it connects the world',
+    ],
+    '🔴 Harder': [
+      'Bioluminescence in deep sea creatures',
+      'The Great Wildebeest Migration on the Serengeti',
+      "Singapore's NEWater treatment technology",
+      'The placebo effect and how the mind affects healing',
+      'Echolocation in bats and dolphins',
+      'Camouflage and mimicry as survival strategies',
+      'Photosynthesis and how plants produce energy',
+      'Ocean currents and their effect on global climate',
+      'The human brain and how memory works',
+      'Symbiosis: mutualism, commensalism and parasitism',
+    ],
+  },
+  'synthesis': {
+    'Pattern Groups': [
+      'Active and passive voice transformation',
+      'Direct to reported speech (statements)',
+      'Direct to reported speech (questions and commands)',
+      'Although / Even though (contrast joining)',
+      'Unless / If...not (negative condition)',
+      'So...that (result clauses)',
+      'Too...to (negative result transformation)',
+      'Relative clauses with who, which, whose',
+      'Not only...but also (addition)',
+      'Word transformation (adjective ↔ noun ↔ verb)',
+      'Because / As / Since (reason joining)',
+      'After / Before / When / As soon as (time clauses)',
+      'In order to / So that (purpose clauses)',
+      'Neither...nor / Either...or',
+      'Comparative and superlative transformation',
+      'Despite / In spite of (contrast)',
+      'Mixed patterns (exam simulation)',
+    ],
+  },
+};
+let currentPlayer = null;
+let currentComp = 'grammar-mcq';
+let selectedTopic = null;
 let quizData = null;
 let submitted = false;
-let selectedTopic = 'wet markets and hawker culture in Singapore';
-let selectedLabel = 'Wet Markets';
-let currentPlayer = null;
-
-// ─── Storage keys ───
-const FB_KEY  = 'psle-cloze-v5-firebase-url';
-const API_KEY = 'psle-cloze-v5-apikey';
-const LOCAL_SCORES_KEY = 'psle-cloze-v5-local-scores';
-
-// ─── Firebase helpers ───
-function getFirebaseUrl() { return localStorage.getItem(FB_KEY) || ''; }
-function saveFirebaseUrl(u) { localStorage.setItem(FB_KEY, u.trim().replace(/\/$/, '')); }
-function isLocalOnly() { return getFirebaseUrl() === '__local__'; }
-
-// ─── Score storage (Firebase or localStorage fallback) ───
+function getFbUrl() { return localStorage.getItem(FB_KEY)||''; }
+function saveFbUrl(u) { localStorage.setItem(FB_KEY, u.trim().replace(/\/$/,'')); }
+function isLocalOnly() { return getFbUrl()==='__local__'; }
+function getApiKey() { return localStorage.getItem(API_KEY_KEY)||''; }
+function saveApiKey(k) { localStorage.setItem(API_KEY_KEY, k.trim()); }
 function emptyScores() {
-  return {Daddy:{quizzes:0,total:0,best:0},Mummy:{quizzes:0,total:0,best:0},Jayden:{quizzes:0,total:0,best:0}};
+  const s={};
+  PLAYERS.forEach(p=>{ s[p]={quizzes:0,total:0,best:0,byComp:{}}; });
+  return s;
 }
-
 async function loadScores() {
   if (isLocalOnly()) {
-    try { const s = localStorage.getItem(LOCAL_SCORES_KEY); return s ? JSON.parse(s) : emptyScores(); } catch(e) { return emptyScores(); }
+    try { const s=localStorage.getItem(LOCAL_KEY); return s?JSON.parse(s):emptyScores(); } catch(e){ return emptyScores(); }
   }
-  const url = getFirebaseUrl();
+  const url=getFbUrl();
   if (!url) return emptyScores();
   try {
-    const r = await fetch(url + '/scores.json');
+    const r=await fetch(url+'/scores.json');
     if (!r.ok) return emptyScores();
-    const data = await r.json();
-    if (!data) return emptyScores();
-    const out = emptyScores();
-    PLAYERS.forEach(p => { if (data[p]) out[p] = data[p]; });
+    const d=await r.json();
+    if (!d) return emptyScores();
+    const out=emptyScores();
+    PLAYERS.forEach(p=>{ if(d[p]) out[p]={...out[p],...d[p]}; });
     return out;
-  } catch(e) { return emptyScores(); }
+  } catch(e){ return emptyScores(); }
 }
-
-async function saveScores(scores) {
-  if (isLocalOnly()) {
-    localStorage.setItem(LOCAL_SCORES_KEY, JSON.stringify(scores)); return;
-  }
-  const url = getFirebaseUrl();
+async function saveScores(s) {
+  if (isLocalOnly()) { localStorage.setItem(LOCAL_KEY,JSON.stringify(s)); return; }
+  const url=getFbUrl();
   if (!url) return;
   try {
-    await fetch(url + '/scores.json', {
-      method: 'PUT',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(scores)
-    });
-  } catch(e) {}
+    await fetch(url+'/scores.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(s)});
+  } catch(e){}
 }
-
-async function recordScore(player, correct) {
-  const s = await loadScores();
+async function recordScore(player, compId, correct, total) {
+  const s=await loadScores();
+  if (!s[player]) s[player]=emptyScores()[player];
   s[player].quizzes++;
-  s[player].total += correct;
-  if (correct > s[player].best) s[player].best = correct;
+  s[player].total+=correct;
+  if (correct>s[player].best) s[player].best=correct;
+  if (!s[player].byComp) s[player].byComp={};
+  if (!s[player].byComp[compId]) s[player].byComp[compId]={quizzes:0,total:0};
+  s[player].byComp[compId].quizzes++;
+  s[player].byComp[compId].total+=correct;
   await saveScores(s);
   renderLeaderboard(s);
 }
-
 async function confirmReset() {
-  if (!confirm('Reset ALL scores for everyone? This cannot be undone.')) return;
-  const blank = emptyScores();
+  if (!confirm('Reset ALL scores for everyone?')) return;
+  const blank=emptyScores();
   await saveScores(blank);
   renderLeaderboard(blank);
 }
-
-// ─── Leaderboard ───
 function renderLeaderboard(scores) {
-  PLAYERS.forEach(p => {
-    const d = scores[p]||{quizzes:0};
-    const chip = document.getElementById('chip-'+p);
-    if (chip) chip.textContent = d.quizzes===0 ? '0 played' : d.quizzes+' played';
+  PLAYERS.forEach(p=>{
+    const d=scores[p]||{quizzes:0};
+    const chip=document.getElementById('chip-'+p);
+    if(chip) chip.textContent=d.quizzes+' played';
   });
-  const ranked = PLAYERS.map(p => {
-    const d = scores[p]||{quizzes:0,total:0,best:0};
-    return {...d, name:p, avg: d.quizzes>0 ? d.total/d.quizzes : 0};
-  }).sort((a,b) => b.avg-a.avg || b.quizzes-a.quizzes);
-  const container = document.getElementById('lb-rows');
-  if (!container) return;
-  if (ranked.every(r => r.quizzes===0)) {
-    container.innerHTML = '<div style="font-size:.85rem;color:var(--muted);text-align:center;padding:8px 0">No scores yet — play a quiz!</div>';
+  const ranked=PLAYERS.map(p=>{
+    const d=scores[p]||{quizzes:0,total:0,best:0};
+    return {...d,name:p,avg:d.quizzes>0?d.total/d.quizzes:0};
+  }).sort((a,b)=>b.avg-a.avg||b.quizzes-a.quizzes);
+  const cont=document.getElementById('lb-rows');
+  if (!cont) return;
+  if (ranked.every(r=>r.quizzes===0)) {
+    cont.innerHTML='<div style="font-size:.82rem;color:var(--muted);text-align:center;padding:6px 0">No scores yet — play a quiz!</div>';
     return;
   }
-  container.innerHTML = ranked.map((r,i) => {
-    const bw = Math.round((r.avg/15)*100);
-    const avg = r.quizzes>0 ? r.avg.toFixed(1) : '—';
-    const syncBadge = isLocalOnly() ? ' <span style="font-size:.6rem;color:var(--muted)">(local)</span>' : '';
-    return '<div class="lb-row r-'+r.name+'">'+
-      '<span class="lb-rank">'+( r.quizzes>0 ? MEDALS[i] : '—' )+'</span>'+
-      '<span class="lb-av">'+AVATARS[r.name]+'</span>'+
-      '<span class="lb-name c-'+r.name+'">'+r.name+syncBadge+'</span>'+
-      '<div class="lb-bar-wrap"><div class="lb-bar b-'+r.name+'" style="width:'+bw+'%"></div></div>'+
-      '<div class="lb-stats">Avg <strong>'+avg+'/15</strong><br>Best <strong>'+r.best+'/15</strong> &middot; '+r.quizzes+' played</div>'+
-      '</div>';
+  cont.innerHTML=ranked.map((r,i)=>{
+    const bw=Math.round((r.avg/(r.quizzes>0?Math.max(...ranked.map(x=>x.avg),1):1))*100);
+    const avg=r.quizzes>0?r.avg.toFixed(1):'—';
+    return `<div class="lb-row r-${r.name}">
+      <span class="lb-rank">${r.quizzes>0?MEDALS[i]:'—'}</span>
+      <span class="lb-av">${AVATARS[r.name]}</span>
+      <span class="lb-name c-${r.name}">${r.name}</span>
+      <div class="lb-bar-wrap"><div class="lb-bar b-${r.name}" style="width:${bw}%"></div></div>
+      <div class="lb-stats">Avg <strong>${avg}</strong><br>${r.best} best · ${r.quizzes} played</div>
+    </div>`;
   }).join('');
 }
-
-// ─── Setup screens ───
 function showScreen(id) {
-  ['firebase-setup','api-setup','main-content'].forEach(s => {
-    document.getElementById(s).style.display = (s===id) ? 'block' : 'none';
+  ['screen-firebase','screen-api','screen-app'].forEach(s=>{
+    document.getElementById(s).style.display=(s===id)?'block':'none';
   });
 }
-
-function submitFirebaseUrl() {
-  const val = document.getElementById('firebase-url-input').value.trim();
-  if (!val.includes('firebaseio.com') && !val.includes('firebasedatabase.app')) {
-    document.getElementById('firebase-url-error').textContent = 'URL should contain firebaseio.com or firebasedatabase.app — see steps above.';
+function submitFbUrl() {
+  const val=document.getElementById('fb-url-input').value.trim();
+  if (!val.includes('firebaseio.com')&&!val.includes('firebasedatabase.app')) {
+    document.getElementById('fb-url-err').textContent='URL should contain firebaseio.com or firebasedatabase.app';
     return;
   }
-  saveFirebaseUrl(val);
-  document.getElementById('firebase-url-error').textContent = '';
+  saveFbUrl(val);
+  document.getElementById('fb-url-err').textContent='';
   initApp();
 }
-
-function skipFirebase() {
-  localStorage.setItem(FB_KEY, '__local__');
-  initApp();
-}
-
-function getApiKey() { return localStorage.getItem(API_KEY) || ''; }
-function saveApiKey(k) { localStorage.setItem(API_KEY, k.trim()); }
-
+function skipFb() { localStorage.setItem(FB_KEY,'__local__'); initApp(); }
 function submitApiKey() {
-  const val = document.getElementById('api-key-input').value.trim();
+  const val=document.getElementById('api-key-input').value.trim();
   if (!val.startsWith('sk-ant-')) {
-    document.getElementById('api-key-error').textContent = 'Key should start with sk-ant-';
+    document.getElementById('api-key-err').textContent='Key should start with sk-ant-';
     return;
   }
   saveApiKey(val);
-  document.getElementById('api-key-error').textContent = '';
+  document.getElementById('api-key-err').textContent='';
   initApp();
 }
-
-function resetApiKey() { localStorage.removeItem(API_KEY); initApp(); }
-function resetFirebase() { localStorage.removeItem(FB_KEY); initApp(); }
-
+function resetApiKey() { localStorage.removeItem(API_KEY_KEY); initApp(); }
+function resetFb() { localStorage.removeItem(FB_KEY); initApp(); }
 function initApp() {
-  if (!getFirebaseUrl()) { showScreen('firebase-setup'); return; }
-  if (!getApiKey()) { showScreen('api-setup'); return; }
-  showScreen('main-content');
+  if (!getFbUrl()) { showScreen('screen-firebase'); return; }
+  if (!getApiKey()) { showScreen('screen-api'); return; }
+  showScreen('screen-app');
+  buildNav();
+  switchComp(currentComp);
   loadScores().then(renderLeaderboard);
 }
-
-window.addEventListener('DOMContentLoaded', () => {
-  initApp();
-  // Topic select listeners
-  document.querySelectorAll('.topic-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedTopic = btn.dataset.topic;
-      selectedLabel = btn.dataset.label;
-    });
+function buildNav() {
+  const sidebar=document.getElementById('sidebar');
+  const mobileNav=document.getElementById('mobile-nav');
+  sidebar.innerHTML='<div class="sidebar-section">Components</div>';
+  mobileNav.innerHTML='';
+  COMPONENTS.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='nav-btn'+(c.id===currentComp?' active':'');
+    btn.innerHTML=`${c.icon} ${c.label} <span class="nav-mark">${c.marks}m</span>`;
+    btn.onclick=()=>switchComp(c.id);
+    sidebar.appendChild(btn);
+    const mbtn=document.createElement('button');
+    mbtn.className='mobile-nav-btn'+(c.id===currentComp?' active':'');
+    mbtn.textContent=c.icon+' '+c.label.split(' ')[0];
+    mbtn.onclick=()=>switchComp(c.id);
+    mobileNav.appendChild(mbtn);
   });
-});
-
-function pickRandom() {
-  const btns = Array.from(document.querySelectorAll('.topic-btn'));
-  const pick = btns[Math.floor(Math.random()*btns.length)];
-  document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
-  pick.classList.add('active');
-  selectedTopic = pick.dataset.topic;
-  selectedLabel = pick.dataset.label;
-  generateQuiz();
 }
-
-function selectPlayer(name) {
-  currentPlayer = name;
-  document.querySelectorAll('.player-btn').forEach(b => b.classList.toggle('active', b.dataset.p===name));
-  document.getElementById('notice').style.display = 'none';
+function switchComp(id) {
+  currentComp=id;
+  quizData=null; submitted=false; selectedTopic=null;
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    b.classList.toggle('active',b.textContent.includes(COMPONENTS.find(c=>c.id===id).label.split(' ')[0]));
+  });
+  document.querySelectorAll('.mobile-nav-btn').forEach(b=>{
+    b.classList.toggle('active',b.textContent.includes(COMPONENTS.find(c=>c.id===id).label.split(' ')[0]));
+  });
+  renderCompPanel();
 }
-
-// ─── AI Prompt ───
-function buildPrompt(topic) {
-  return `You are a Singapore MOE primary school English teacher writing a PSLE Paper 2 Comprehension Cloze passage.
-
-TOPIC: ${topic}
-
-RULES:
-1. Non-fiction informational text, P5/P6 level, 4 paragraphs, ~200 words when blanks are filled.
-2. Exactly 15 blanks marked [BLANK_1] to [BLANK_15], at least 3 per paragraph.
-3. Each blank = EXACTLY ONE WORD (no phrases, no hyphens, no contractions).
-4. Blank types: ~5 verbs, ~3 prepositions, ~3 collocations (single key word), ~2 conjunctions, ~2 nouns/adjectives. Avoid trivial words like "a", "the", "is".
-5. For each blank provide the best single-word answer AND any equally correct single-word alternatives. Explanations max 10 words.
-6. CRITICAL FORMAT: passage is a JSON string with 4 paragraphs separated by \n\n. No line breaks WITHIN a paragraph.
-
-Return ONLY this JSON (no markdown):
-{"title":"...","passage":"para1 [BLANK_1] text [BLANK_2].\n\npara2 [BLANK_3] text [BLANK_4].\n\npara3.\n\npara4.","blanks":[{"n":1,"p":"word","a":["word","alt"],"t":"verb","e":"clue"},{"n":2,"p":"word","a":["word"],"t":"prep","e":"clue"}]}
-
-All 15 blank objects required. "a" must include "p". All "a" values must be single words.`;
-}
-
-// ─── Validation ───
-function isSingleWord(w) { return typeof w==='string' && w.trim().split(/\s+/).length===1 && w.trim().length>0; }
-function sanitiseAccepted(arr) {
-  if (!Array.isArray(arr)) return [];
-  return [...new Set(arr.map(w=>w.trim().toLowerCase()).filter(isSingleWord))];
-}
-const norm = w => w.trim().toLowerCase().replace(/[^a-z']/g,'');
-
-// ─── Generate Quiz ───
-async function generateQuiz() {
-  if (!currentPlayer) {
-    document.getElementById('notice').style.display='block';
-    document.querySelector('.player-btn').scrollIntoView({behavior:'smooth'});
-    return;
-  }
-  const area = document.getElementById('quiz-area');
-  const genBtn = document.getElementById('gen-btn');
-  area.innerHTML = `<div class="loading-state"><div class="spinner"></div>
-    <p>Crafting a passage on <strong>${selectedLabel}</strong> for <strong>${currentPlayer}</strong>&hellip;</p>
-    <p style="margin-top:8px;font-size:.8rem;color:var(--muted)">Building multi-answer key&hellip;</p></div>`;
-  genBtn.disabled = true;
-  document.getElementById('random-btn').disabled = true;
-  submitted = false; quizData = null;
-
-  try {
-    const apiKey = getApiKey();
-    if (!apiKey) { initApp(); return; }
-
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 3000,
-        messages: [{role:'user', content: buildPrompt(selectedTopic)}]
-      })
+function renderCompPanel() {
+  const comp=COMPONENTS.find(c=>c.id===currentComp);
+  const topics=TOPICS[currentComp];
+  const panel=document.getElementById('comp-panel');
+  let topicHtml='';
+  Object.entries(topics).forEach(([section,list])=>{
+    topicHtml+=`<div class="topic-section">${section}</div><div class="topic-grid">`;
+    list.forEach((t,i)=>{
+      const isHard=section.includes('Harder')||section.includes('Hard')||section.includes('Tricky');
+      const active=(selectedTopic===t)?'active':'';
+      topicHtml+=`<button class="topic-chip ${isHard?'hard':''} ${active}" data-topic="${t}" onclick="selectTopic(this,'${t.replace(/'/g,"\\'")}')">${t.split(':')[0].split('(')[0].trim().substring(0,30)}</button>`;
     });
-
-    let data;
-    try { data = await resp.json(); } catch(e) { throw new Error(`Server returned non-JSON (status ${resp.status}). Check your API key.`); }
-
-    if (resp.status===401) { resetApiKey(); throw new Error('Invalid API key — please re-enter it.'); }
-    if (resp.status===403) throw new Error('API key has no permission. Check console.anthropic.com.');
-    if (resp.status===429) throw new Error('Too many requests — wait a moment and try again.');
-    if (resp.status===500) throw new Error('Anthropic server error — try again.');
-    if (!resp.ok) throw new Error(`API error ${resp.status}: ${data?.error?.message||'Unknown error'}`);
-    if (!data.content || !Array.isArray(data.content)) throw new Error(`Unexpected API response. Raw: ${JSON.stringify(data).slice(0,200)}`);
-
-    const raw = data.content.map(i=>i.text||'').join('').trim();
-    const clean = raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
-
-    let parsed;
-    try { parsed = JSON.parse(clean); } catch(e) { throw new Error(`AI returned malformed JSON. Try again. (${e.message})`); }
-
-    if (!parsed.passage || !Array.isArray(parsed.blanks) || parsed.blanks.length!==15)
-      throw new Error('Invalid quiz structure — expected 15 blanks');
-
-    parsed.blanks = parsed.blanks.map((b,idx) => ({
-      number:         b.number         ?? b.n ?? (idx+1),
-      primaryAnswer:  b.primaryAnswer  ?? b.p ?? '',
-      acceptedAnswers: b.acceptedAnswers ?? b.a ?? [],
-      type:           b.type           ?? b.t ?? '',
-      explanation:    b.explanation    ?? b.e ?? ''
-    }));
-
-    for (const b of parsed.blanks) {
-      if (!isSingleWord(b.primaryAnswer)) throw new Error(`Blank ${b.number} answer "${b.primaryAnswer}" is not a single word`);
-      b.acceptedAnswers = sanitiseAccepted(b.acceptedAnswers);
-      if (b.acceptedAnswers.length===0) b.acceptedAnswers = [b.primaryAnswer.trim().toLowerCase()];
-      const np = b.primaryAnswer.trim().toLowerCase();
-      if (!b.acceptedAnswers.includes(np)) b.acceptedAnswers.unshift(np);
-    }
-
-    quizData = parsed;
-    renderQuiz();
-  } catch(err) {
-    area.innerHTML = `<div class="error-state">&#x26A0;&#xFE0F; Couldn't generate quiz. Please try again.<br><small style="opacity:.7">${err.message}</small></div>
-    <div class="gen-bar"><button class="btn-secondary" onclick="generateQuiz()">Try Again</button></div>`;
-  } finally {
-    genBtn.disabled = false;
-    document.getElementById('random-btn').disabled = false;
-  }
-}
-
-// ─── Render Quiz ───
-function renderQuiz() {
-  let html = quizData.passage;
-  for (let i=1; i<=15; i++) {
-    html = html.replace(`[BLANK_${i}]`,
-      `<span class="blank-wrap"><span class="blank-num">${i}</span><input class="blank-input" id="b${i}" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="___"/><span class="answer-hint" id="h${i}"></span></span>`
-    );
-  }
-  const paras = html
-    .replace(/\r\n/g,'\n')
-    .split(/\n{2,}/)
-    .map(p => p.replace(/\n/g,' ').trim())
-    .filter(p => p.length>0)
-    .map(p => `<p>${p}</p>`)
-    .join('');
-
-  document.getElementById('quiz-area').innerHTML = `
-    <div class="meta-bar">
-      <span class="player-pill pp-${currentPlayer}">${AVATARS[currentPlayer]} ${currentPlayer}</span>
-      <span class="topic-pill">&#x1F4CC; ${selectedLabel}</span>
-      <span class="meta-pill">&#x1F4CA; 15 blanks</span>
-      <span class="meta-pill">&#x1F3AF; PSLE Standard</span>
-    </div>
-    <button class="hint-toggle" id="hint-toggle-btn" onclick="toggleHints()">&#x1F4A1; Show answer-type hints</button>
-    <div id="hint-panel" style="display:none" class="hint-panel">
-      <strong>Answer types:</strong>
-      <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;">
-        ${quizData.blanks.map(b=>`<span style="white-space:nowrap"><strong>${b.number}.</strong> <em>${b.type}</em></span>`).join(' &nbsp;')}
+    topicHtml+='</div>';
+  });
+  panel.innerHTML=`
+    <div class="card">
+      <div class="comp-header">
+        <span class="comp-icon">${comp.icon}</span>
+        <div>
+          <div class="comp-title">${comp.label}</div>
+          <div class="comp-subtitle">${comp.desc}</div>
+        </div>
+        <span class="comp-badge">${comp.marks} marks</span>
+      </div>
+      ${topicHtml}
+      <div class="notice" id="notice-player">☝️ Please select a player first.</div>
+      <div class="gen-bar">
+        <button class="btn-primary" id="gen-btn" onclick="generateQuiz()">🎲 Generate Quiz</button>
+        <button class="btn-secondary" onclick="pickRandom()">🔀 Surprise Me</button>
       </div>
     </div>
-    <p class="instruction">Fill in each blank with the most suitable word. One word only. Spelling must be accurate.</p>
-    <div class="passage-card">
-      <h2>${quizData.title||'Comprehension Cloze'}</h2>
-      ${paras}
-    </div>
-    <div id="score-area"></div>
-    <div class="quiz-actions">
-      <button class="btn-primary" id="submit-btn" onclick="submitQuiz()">Check Answers</button>
-      <button class="btn-warn" id="reveal-btn" onclick="revealAll()" style="display:none">Reveal All</button>
-      <button class="btn-secondary" onclick="resetQuiz()">Clear</button>
-    </div>
-    <div id="status-msg"></div>
-    <div id="review-area"></div>`;
-
-  for (let i=1; i<=15; i++) {
-    document.getElementById(`b${i}`).addEventListener('keydown', e => {
-      if (e.key==='Enter') { e.preventDefault(); const n=document.getElementById(`b${i+1}`); if(n) n.focus(); }
+    <div id="quiz-area"></div>`;
+}
+function selectTopic(btn, topic) {
+  document.querySelectorAll('.topic-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedTopic=topic;
+}
+function pickRandom() {
+  const all=Object.values(TOPICS[currentComp]).flat();
+  const pick=all[Math.floor(Math.random()*all.length)];
+  selectedTopic=pick;
+  document.querySelectorAll('.topic-chip').forEach(b=>{
+    b.classList.toggle('active',b.dataset.topic===pick);
+  });
+  generateQuiz();
+}
+function selectPlayer(name) {
+  currentPlayer=name;
+  document.querySelectorAll('.player-btn').forEach(b=>b.classList.toggle('active',b.dataset.p===name));
+  const n=document.getElementById('notice-player');
+  if(n) n.style.display='none';
+}
+function buildPrompt(compId, topic) {
+  const prompts={
+    'grammar-mcq': `You are a Singapore PSLE English Paper 2 examiner. Create 10 Grammar MCQ questions on the topic: "${topic}".
+Format: each question is a sentence with ONE blank. Provide 4 options (A-D), exactly one correct.
+Cover varied grammar: SVA, tenses, question tags, passive, reported speech, gerunds, modals, relative pronouns, articles, prepositions.
+PSLE P5/P6 difficulty. No trivially easy questions.
+Return ONLY this JSON:
+{"title":"${topic}","questions":[{"n":1,"sentence":"The sentence with ___ blank.","options":["A option","B option","C option","D option"],"answer":0,"type":"SVA","explanation":"Why A is correct."}]}
+All 10 questions required. answer is 0-indexed. explanation max 20 words.`,
+    'vocab-mcq': `You are a Singapore PSLE English Paper 2 examiner. Create 5 Vocabulary MCQ questions on the topic: "${topic}".
+Format: each question is a sentence with ONE blank testing vocabulary. Provide 4 options (A-D), exactly one correct.
+Test nuances between similar words, not just definitions. P5/P6 level vocabulary.
+Options should be plausible near-synonyms to make it challenging.
+Return ONLY this JSON:
+{"title":"${topic}","questions":[{"n":1,"sentence":"The sentence with ___ blank.","options":["A option","B option","C option","D option"],"answer":0,"type":"vocabulary","explanation":"Why A is correct in this context."}]}
+All 5 questions required. answer is 0-indexed. explanation max 25 words.`,
+    'vocab-cloze': `You are a Singapore PSLE English Paper 2 examiner. Create a Vocabulary Cloze passage on: "${topic}".
+Write a passage (~100 words) with 5 blanks numbered [1] to [5].
+For each blank, provide 4 options (A-D) where exactly one fits best in context.
+Test vocabulary knowledge in context. P5/P6 level.
+Return ONLY this JSON:
+{"title":"${topic}","passage":"Passage text with (1), (2), (3), (4), (5) blanks.","questions":[{"n":1,"options":["A word","B word","C word","D word"],"answer":0,"explanation":"Why A fits best here."}]}
+All 5 questions required. answer is 0-indexed.`,
+    'grammar-cloze': `You are a Singapore PSLE English Paper 2 examiner. Create a Grammar Cloze on: "${topic}".
+Write a passage (~150 words) with 10 blanks [BLANK_1] to [BLANK_10].
+Provide a word bank of 12 words (10 correct + 2 distractors). Each blank needs exactly one word from the bank.
+Test grammar: tenses, prepositions, conjunctions, pronouns, articles. P5/P6 level.
+CRITICAL: passage paragraphs separated by \\n\\n, no line breaks within paragraphs.
+Return ONLY this JSON:
+{"title":"${topic}","passage":"Para1 [BLANK_1] text [BLANK_2].\\n\\nPara2 [BLANK_3].","wordbank":["word1","word2","word3","word4","word5","word6","word7","word8","word9","word10","extra1","extra2"],"answers":["ans1","ans2","ans3","ans4","ans5","ans6","ans7","ans8","ans9","ans10"],"types":["prep","conj","tense","pronoun","article","verb","prep","conj","noun","adj"],"explanations":["clue1","clue2","clue3","clue4","clue5","clue6","clue7","clue8","clue9","clue10"]}
+wordbank has 12 words. answers has 10 words (each must be in wordbank). explanations max 10 words each.`,
+    'editing': `You are a Singapore PSLE English Paper 2 examiner. Create an Editing passage on: "${topic}".
+Write a passage (~150 words) with exactly 10 underlined words marked (1) to (10).
+Of the 10: exactly 5 contain errors (grammar OR spelling), exactly 5 are already correct.
+Errors: subject-verb agreement, wrong tense, wrong word form, spelling mistakes (P5/P6 level).
+Correct answers for errors: single-word replacement. Correct words: write "correct" as the answer.
+CRITICAL: passage paragraphs separated by \\n\\n, no line breaks within paragraphs.
+Return ONLY this JSON:
+{"title":"${topic}","passage":"Text with (1)word1 and (2)word2 in sentences.\\n\\nMore text with (3)word3.","words":["word1","word2","word3","word4","word5","word6","word7","word8","word9","word10"],"answers":["correction_or_correct","correction_or_correct","correct","correction_or_correct","correct","correct","correction_or_correct","correction_or_correct","correct","correction_or_correct"],"types":["spelling","SVA","correct","tense","correct","correct","word-form","spelling","correct","tense"],"explanations":["brief reason","brief reason","already correct","brief reason","already correct","already correct","brief reason","brief reason","already correct","brief reason"]}
+answers: if error write correction; if already correct write "correct". explanations max 10 words.`,
+    'comprehension': `You are a Singapore MOE primary school English teacher writing a PSLE Paper 2 Comprehension Cloze.
+TOPIC: ${topic}
+RULES:
+1. Non-fiction informational text, P5/P6 level, 4 paragraphs, ~200 words when blanks are filled.
+2. Exactly 15 blanks [BLANK_1] to [BLANK_15], at least 3 per paragraph.
+3. Each blank = EXACTLY ONE WORD. No phrases, hyphens, contractions.
+4. Types: ~5 verbs, ~3 prepositions, ~3 collocations, ~2 conjunctions, ~2 nouns/adjectives.
+5. For each blank: best answer + equally valid single-word alternatives. Max 10-word explanations.
+6. CRITICAL: 4 paragraphs separated by \\n\\n, NO line breaks within a paragraph.
+Return ONLY this JSON:
+{"title":"...","passage":"para1 [BLANK_1] text.\\n\\npara2 [BLANK_3].\\n\\npara3.\\n\\npara4.","blanks":[{"n":1,"p":"word","a":["word","alt"],"t":"verb","e":"clue"}]}
+All 15 blanks required.`,
+    'synthesis': `You are a Singapore PSLE English Paper 2 examiner. Create 5 Synthesis & Transformation questions on: "${topic}".
+Each question: give 1 or 2 sentences + a stem/instruction. Student completes the transformation.
+Cover varied patterns matching the topic: passive voice, reported speech, although/unless/so-that/too-to, relative clauses, word transformation, not only...but also, comparatives, because/since, after/before/when, despite/in spite of.
+Each question worth 2 marks. P5/P6 difficulty.
+Return ONLY this JSON:
+{"title":"${topic}","questions":[{"n":1,"type":"passive","sentences":["The teacher praised the students."],"instruction":"Rewrite in passive voice.","stem":"The students ___","answer":"were praised by the teacher.","alternatives":[],"explanation":"Object becomes subject; was/were + past participle + by."}]}
+All 5 questions required. answer is the COMPLETION of the stem (what goes in the blank). alternatives: other accepted completions. explanation max 25 words.`,
+  };
+  return prompts[compId];
+}
+async function generateQuiz() {
+  if (!currentPlayer) {
+    const n=document.getElementById('notice-player');
+    if(n){ n.style.display='block'; n.scrollIntoView({behavior:'smooth'}); }
+    return;
+  }
+  if (!selectedTopic) {
+    const all=Object.values(TOPICS[currentComp]).flat();
+    selectedTopic=all[0];
+    const chip=document.querySelector('.topic-chip[data-topic="'+selectedTopic+'"]');
+    if(chip){ document.querySelectorAll('.topic-chip').forEach(b=>b.classList.remove('active')); chip.classList.add('active'); }
+  }
+  const area=document.getElementById('quiz-area');
+  const genBtn=document.getElementById('gen-btn');
+  const comp=COMPONENTS.find(c=>c.id===currentComp);
+  area.innerHTML=`<div class="loading-state"><div class="spinner"></div><p>Generating <strong>${comp.label}</strong> on <em>${selectedTopic.substring(0,40)}</em>…</p></div>`;
+  genBtn.disabled=true;
+  submitted=false; quizData=null;
+  try {
+    const apiKey=getApiKey();
+    if (!apiKey){ resetApiKey(); return; }
+    const resp=await fetch('https:
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',
+        max_tokens:3000,
+        messages:[{role:'user',content:buildPrompt(currentComp,selectedTopic)}]
+      })
+    });
+    let data;
+    try{ data=await resp.json(); }catch(e){ throw new Error(`Non-JSON response (${resp.status}). Check API key.`); }
+    if(resp.status===401){ resetApiKey(); throw new Error('Invalid API key.'); }
+    if(resp.status===429) throw new Error('Too many requests — wait and try again.');
+    if(!resp.ok) throw new Error(`API error ${resp.status}: ${data?.error?.message||'unknown'}`);
+    if(!data.content||!Array.isArray(data.content)) throw new Error('Unexpected API response format.');
+    const raw=data.content.map(i=>i.text||'').join('').trim();
+    const clean=raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
+    let parsed;
+    try{ parsed=JSON.parse(clean); }catch(e){ throw new Error(`Malformed JSON from AI. Try again. (${e.message})`); }
+    quizData=parsed;
+    renderQuiz();
+  } catch(err){
+    area.innerHTML=`<div class="error-state">⚠️ ${err.message}</div><div class="gen-bar"><button class="btn-secondary" onclick="generateQuiz()">Try Again</button></div>`;
+  } finally {
+    genBtn.disabled=false;
+  }
+}
+function renderQuiz() {
+  const comp=COMPONENTS.find(c=>c.id===currentComp);
+  const area=document.getElementById('quiz-area');
+  const metaHtml=`<div class="quiz-meta">
+    <span class="player-pill pp-${currentPlayer}">${AVATARS[currentPlayer]} ${currentPlayer}</span>
+    <span class="meta-pill">${comp.icon} ${comp.label}</span>
+    <span class="meta-pill">${comp.marks} marks</span>
+  </div>`;
+  switch(currentComp){
+    case 'grammar-mcq': case 'vocab-mcq': renderMCQ(area, metaHtml); break;
+    case 'vocab-cloze': renderVocabCloze(area, metaHtml); break;
+    case 'grammar-cloze': renderGrammarCloze(area, metaHtml); break;
+    case 'editing': renderEditing(area, metaHtml); break;
+    case 'comprehension': renderComprehension(area, metaHtml); break;
+    case 'synthesis': renderSynthesis(area, metaHtml); break;
+  }
+}
+function renderMCQ(area, metaHtml) {
+  const qs=quizData.questions||[];
+  let html=metaHtml+`<p style="font-size:.83rem;color:var(--muted);margin-bottom:14px;font-style:italic;font-family:'Lora',serif">Choose the best answer for each question.</p>`;
+  qs.forEach((q,qi)=>{
+    const sentence=q.sentence.replace('___','<span class="blank">________</span>');
+    html+=`<div class="question-block" id="qb${qi}">
+      <div class="q-label">Question ${q.n} ${q.type?`<span style="font-size:.6rem;background:#f1f5f9;padding:1px 5px;border-radius:3px;color:#475569">${q.type}</span>`:''}</div>
+      <div class="q-text">${sentence}</div>
+      <div class="options" id="opts${qi}">
+        ${q.options.map((opt,oi)=>`<button class="option-btn" id="opt${qi}_${oi}" onclick="selectMCQ(${qi},${oi})" data-qi="${qi}" data-oi="${oi}">
+          <span class="option-label">${['A','B','C','D'][oi]}</span>${opt}
+        </button>`).join('')}
+      </div>
+      <div class="q-explanation" id="exp${qi}">💡 ${q.explanation||''}</div>
+    </div>`;
+  });
+  html+=`<div id="score-area"></div>
+  <div class="quiz-actions">
+    <button class="btn-primary" id="submit-btn" onclick="submitMCQ()">Check Answers</button>
+    <button class="btn-secondary" onclick="resetQuizUI()">Clear</button>
+  </div>
+  <div id="status-msg"></div>`;
+  area.innerHTML=html;
+}
+function selectMCQ(qi, oi) {
+  if(submitted) return;
+  document.querySelectorAll(`#opts${qi} .option-btn`).forEach(b=>b.classList.remove('selected'));
+  document.getElementById(`opt${qi}_${oi}`).classList.add('selected');
+}
+async function submitMCQ() {
+  if(submitted) return;
+  const qs=quizData.questions||[];
+  const total=qs.length;
+  let allAnswered=true;
+  qs.forEach((q,qi)=>{
+    if(!document.querySelector(`#opts${qi} .option-btn.selected`)) allAnswered=false;
+  });
+  if(!allAnswered){ document.getElementById('status-msg').textContent='Please answer all questions first.'; return; }
+  document.getElementById('status-msg').textContent='';
+  submitted=true;
+  let correct=0;
+  qs.forEach((q,qi)=>{
+    const selected=document.querySelector(`#opts${qi} .option-btn.selected`);
+    const selectedOi=parseInt(selected.dataset.oi);
+    const isCorrect=selectedOi===q.answer;
+    if(isCorrect) correct++;
+    document.querySelectorAll(`#opts${qi} .option-btn`).forEach((b,oi)=>{
+      b.disabled=true;
+      if(oi===q.answer) b.classList.add(isCorrect||oi===q.answer?'show-correct':'show-correct');
+      if(oi===selectedOi&&!isCorrect) b.classList.add('wrong');
+      if(oi===q.answer) b.classList.add('correct');
+    });
+    document.getElementById(`exp${qi}`).classList.add('show');
+  });
+  await recordScore(currentPlayer,currentComp,correct,total);
+  showScoreCard(correct,total);
+  document.getElementById('submit-btn').style.display='none';
+}
+function renderVocabCloze(area, metaHtml) {
+  const passage=quizData.passage||'';
+  let passageHtml=passage;
+  for(let i=1;i<=5;i++){
+    passageHtml=passageHtml.replace(`(${i})`,`<strong style="color:var(--accent)">(${i})</strong>`);
+  }
+  const paras=passageHtml.replace(/\r\n/g,'\n').split(/\n{2,}/).map(p=>p.replace(/\n/g,' ').trim()).filter(p=>p).map(p=>`<p>${p}</p>`).join('');
+  const qs=quizData.questions||[];
+  let html=metaHtml+`<div class="passage-card"><h3>Read the passage and choose the best word for each blank.</h3>${paras}</div>`;
+  qs.forEach((q,qi)=>{
+    html+=`<div class="question-block" id="qb${qi}">
+      <div class="q-label">Blank (${q.n})</div>
+      <div class="options" id="opts${qi}">
+        ${q.options.map((opt,oi)=>`<button class="option-btn" id="opt${qi}_${oi}" onclick="selectMCQ(${qi},${oi})" data-qi="${qi}" data-oi="${oi}">
+          <span class="option-label">${['A','B','C','D'][oi]}</span>${opt}
+        </button>`).join('')}
+      </div>
+      <div class="q-explanation" id="exp${qi}">💡 ${q.explanation||''}</div>
+    </div>`;
+  });
+  html+=`<div id="score-area"></div>
+  <div class="quiz-actions">
+    <button class="btn-primary" id="submit-btn" onclick="submitMCQ()">Check Answers</button>
+    <button class="btn-secondary" onclick="resetQuizUI()">Clear</button>
+  </div><div id="status-msg"></div>`;
+  area.innerHTML=html;
+}
+function renderGrammarCloze(area, metaHtml) {
+  const wb=quizData.wordbank||[];
+  let passage=quizData.passage||'';
+  for(let i=1;i<=10;i++){
+    passage=passage.replace(`[BLANK_${i}]`,
+      `<span class="blank-wrap"><span class="blank-num">${i}</span><input class="blank-input" id="gc${i}" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="___"/><span class="blank-hint" id="gch${i}"></span></span>`
+    );
+  }
+  const paras=passage.replace(/\r\n/g,'\n').split(/\n{2,}/).map(p=>p.replace(/\n/g,' ').trim()).filter(p=>p).map(p=>`<p>${p}</p>`).join('');
+  const wbHtml=wb.map(w=>`<span class="wb-word" onclick="insertWord('${w}')">${w}</span>`).join('');
+  let html=metaHtml+`
+  <div class="word-bank"><div class="word-bank-title">📦 Word Bank — click a word to insert it at the focused blank</div><div class="word-bank-words" id="word-bank-words">${wbHtml}</div></div>
+  <div class="passage-card"><h3>Fill in each blank using a word from the word bank. Each word may only be used once.</h3>${paras}</div>
+  <div id="score-area"></div>
+  <div class="quiz-actions">
+    <button class="btn-primary" id="submit-btn" onclick="submitGrammarCloze()">Check Answers</button>
+    <button class="btn-warn" id="reveal-btn" onclick="revealGrammarCloze()" style="display:none">Reveal All</button>
+    <button class="btn-secondary" onclick="resetQuizUI()">Clear</button>
+  </div><div id="status-msg"></div>`;
+  area.innerHTML=html;
+  let lastFocused=null;
+  for(let i=1;i<=10;i++){
+    const inp=document.getElementById(`gc${i}`);
+    inp.addEventListener('focus',()=>lastFocused=i);
+    inp.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){e.preventDefault();const n=document.getElementById(`gc${i+1}`);if(n)n.focus();}
     });
   }
-  document.getElementById('quiz-area').scrollIntoView({behavior:'smooth',block:'start'});
+  window._gcLastFocused=()=>lastFocused;
 }
-
-function toggleHints() {
-  const p=document.getElementById('hint-panel'), b=document.getElementById('hint-toggle-btn');
-  const shown = p.style.display!=='none';
-  p.style.display = shown?'none':'block';
-  b.textContent = shown ? '&#x1F4A1; Show answer-type hints' : '&#x1F4A1; Hide hints';
+function insertWord(word) {
+  const lf=window._gcLastFocused?window._gcLastFocused():null;
+  if(lf){
+    const inp=document.getElementById(`gc${lf}`);
+    if(inp&&!inp.disabled){ inp.value=word; inp.focus(); }
+  }
 }
-
-// ─── Submit ───
-async function submitQuiz() {
-  if (!quizData||submitted) return;
-  for (let i=1;i<=15;i++) {
-    if (!document.getElementById(`b${i}`).value.trim()) {
-      document.getElementById('status-msg').textContent='Please fill in all 15 blanks before checking.'; return;
+async function submitGrammarCloze() {
+  if(submitted) return;
+  const answers=quizData.answers||[];
+  for(let i=1;i<=10;i++){
+    if(!document.getElementById(`gc${i}`).value.trim()){
+      document.getElementById('status-msg').textContent='Please fill in all 10 blanks.'; return;
     }
   }
-  for (let i=1;i<=15;i++) {
-    if (document.getElementById(`b${i}`).value.trim().split(/\s+/).length>1) {
+  document.getElementById('status-msg').textContent='';
+  submitted=true;
+  let correct=0; const wrong=[];
+  for(let i=1;i<=10;i++){
+    const inp=document.getElementById(`gc${i}`), hint=document.getElementById(`gch${i}`);
+    const ua=inp.value.trim().toLowerCase(), ca=(answers[i-1]||'').toLowerCase();
+    inp.disabled=true;
+    if(ua===ca){inp.classList.add('correct');hint.textContent='✓';hint.className='blank-hint correct';correct++;}
+    else{inp.classList.add('wrong');hint.textContent=answers[i-1];hint.className='blank-hint wrong';wrong.push(i);}
+  }
+  await recordScore(currentPlayer,currentComp,correct,10);
+  showScoreCard(correct,10);
+  document.getElementById('submit-btn').style.display='none';
+  if(wrong.length>0) document.getElementById('reveal-btn').style.display='inline-block';
+}
+function revealGrammarCloze(){
+  const answers=quizData.answers||[];
+  for(let i=1;i<=10;i++){
+    const inp=document.getElementById(`gc${i}`),hint=document.getElementById(`gch${i}`);
+    if(inp&&inp.classList.contains('wrong')){
+      inp.classList.replace('wrong','revealed');inp.value=answers[i-1];
+      if(hint){hint.textContent='';hint.className='blank-hint';}
+    }
+  }
+  document.getElementById('reveal-btn').style.display='none';
+}
+function renderEditing(area, metaHtml) {
+  const words=quizData.words||[];
+  let passage=quizData.passage||'';
+  words.forEach((w,i)=>{
+    passage=passage.replace(`(${i+1})${w}`,
+      `<span class="underlined-word"><span class="uw-num">${i+1}</span><span class="uw-text">${w}</span></span>`
+    );
+  });
+  const paras=passage.replace(/\r\n/g,'\n').split(/\n{2,}/).map(p=>p.replace(/\n/g,' ').trim()).filter(p=>p).map(p=>`<p>${p}</p>`).join('');
+  let rowsHtml='';
+  words.forEach((w,i)=>{
+    rowsHtml+=`<div class="edit-row" id="er${i}">
+      <span class="edit-num">${i+1}</span>
+      <span class="edit-word">${w}</span>
+      <input class="edit-input" id="ei${i}" type="text" placeholder='correction or "correct"' autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <span class="edit-tag" id="et${i}"></span>
+    </div>`;
+  });
+  let html=metaHtml+`
+  <div class="editing-passage"><h3>Find the errors. Write the correction, or "correct" if the word is already correct.</h3>${paras}</div>
+  ${rowsHtml}
+  <div id="score-area"></div>
+  <div class="quiz-actions">
+    <button class="btn-primary" id="submit-btn" onclick="submitEditing()">Check Answers</button>
+    <button class="btn-warn" id="reveal-btn" onclick="revealEditing()" style="display:none">Show Answers</button>
+    <button class="btn-secondary" onclick="resetQuizUI()">Clear</button>
+  </div><div id="status-msg"></div>`;
+  area.innerHTML=html;
+  for(let i=0;i<words.length;i++){
+    document.getElementById(`ei${i}`).addEventListener('keydown',e=>{
+      if(e.key==='Enter'){e.preventDefault();const n=document.getElementById(`ei${i+1}`);if(n)n.focus();}
+    });
+  }
+}
+async function submitEditing(){
+  if(submitted) return;
+  const answers=quizData.answers||[];
+  const words=quizData.words||[];
+  for(let i=0;i<words.length;i++){
+    if(!document.getElementById(`ei${i}`).value.trim()){
+      document.getElementById('status-msg').textContent='Please fill in all 10 rows.'; return;
+    }
+  }
+  document.getElementById('status-msg').textContent='';
+  submitted=true;
+  let correct=0; const wrong=[];
+  for(let i=0;i<words.length;i++){
+    const inp=document.getElementById(`ei${i}`), tag=document.getElementById(`et${i}`);
+    const ua=inp.value.trim().toLowerCase();
+    const ca=(answers[i]||'').toLowerCase();
+    const isCorrect=ua===ca||(ca==='correct'&&(ua==='correct'||ua===words[i].toLowerCase()));
+    inp.disabled=true;
+    if(isCorrect){
+      inp.classList.add('correct'); tag.textContent='✓'; tag.className='edit-tag correct'; correct++;
+    } else {
+      inp.classList.add('wrong'); tag.textContent=answers[i]; tag.className='edit-tag wrong'; wrong.push(i+1);
+    }
+  }
+  await recordScore(currentPlayer,currentComp,correct,words.length);
+  showScoreCard(correct,words.length);
+  document.getElementById('submit-btn').style.display='none';
+  if(wrong.length>0) document.getElementById('reveal-btn').style.display='inline-block';
+}
+function revealEditing(){
+  const answers=quizData.answers||[];
+  for(let i=0;i<(quizData.words||[]).length;i++){
+    const inp=document.getElementById(`ei${i}`);
+    if(inp&&inp.classList.contains('wrong')){
+      inp.classList.replace('wrong','revealed');inp.value=answers[i];
+    }
+  }
+  document.getElementById('reveal-btn').style.display='none';
+}
+function renderComprehension(area, metaHtml) {
+  const blanks=quizData.blanks||[];
+  let passage=quizData.passage||'';
+  for(let i=1;i<=15;i++){
+    passage=passage.replace(`[BLANK_${i}]`,
+      `<span class="blank-wrap"><span class="blank-num">${i}</span><input class="blank-input" id="b${i}" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="___"/><span class="blank-hint" id="h${i}"></span></span>`
+    );
+  }
+  const paras=passage.replace(/\r\n/g,'\n').split(/\n{2,}/).map(p=>p.replace(/\n/g,' ').trim()).filter(p=>p).map(p=>`<p>${p}</p>`).join('');
+  let html=metaHtml+`
+  <button class="hint-toggle" id="hint-toggle-btn" onclick="toggleHints()">💡 Show answer-type hints</button>
+  <div id="hint-panel" style="display:none" class="hint-panel">
+    <strong>Types:</strong> ${blanks.map(b=>`<span style="white-space:nowrap"><strong>${b.n||b.number}.</strong> <em>${b.t||b.type}</em></span>`).join(' &nbsp;')}
+  </div>
+  <div class="passage-card"><h3>${quizData.title||'Comprehension Cloze'}</h3>${paras}</div>
+  <div id="score-area"></div>
+  <div class="quiz-actions">
+    <button class="btn-primary" id="submit-btn" onclick="submitComprehension()">Check Answers</button>
+    <button class="btn-warn" id="reveal-btn" onclick="revealComprehension()" style="display:none">Reveal All</button>
+    <button class="btn-secondary" onclick="resetQuizUI()">Clear</button>
+  </div><div id="status-msg"></div>
+  <div id="review-area"></div>`;
+  area.innerHTML=html;
+  for(let i=1;i<=15;i++){
+    const inp=document.getElementById(`b${i}`);
+    if(inp) inp.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){e.preventDefault();const n=document.getElementById(`b${i+1}`);if(n)n.focus();}
+    });
+  }
+}
+function toggleHints(){
+  const p=document.getElementById('hint-panel'),b=document.getElementById('hint-toggle-btn');
+  const shown=p.style.display!=='none';
+  p.style.display=shown?'none':'block';
+  b.textContent=shown?'💡 Show answer-type hints':'💡 Hide hints';
+}
+const norm=w=>w.trim().toLowerCase().replace(/[^a-z']/g,'');
+function isSingleWord(w){return typeof w==='string'&&w.trim().split(/\s+/).length===1&&w.trim().length>0;}
+function sanitiseA(arr){if(!Array.isArray(arr))return[];return[...new Set(arr.map(w=>w.trim().toLowerCase()).filter(isSingleWord))];}
+async function submitComprehension(){
+  if(submitted) return;
+  for(let i=1;i<=15;i++){
+    if(!document.getElementById(`b${i}`)?.value.trim()){
+      document.getElementById('status-msg').textContent='Please fill in all 15 blanks.'; return;
+    }
+  }
+  for(let i=1;i<=15;i++){
+    if((document.getElementById(`b${i}`)?.value||'').trim().split(/\s+/).length>1){
       document.getElementById('status-msg').textContent=`Blank ${i}: one word only.`;
       document.getElementById(`b${i}`).focus(); return;
     }
   }
   document.getElementById('status-msg').textContent='';
   submitted=true;
+  const blanks=quizData.blanks||[];
+  const nb=blanks.map((b,idx)=>({
+    number:b.number??b.n??(idx+1),
+    primaryAnswer:b.primaryAnswer??b.p??'',
+    acceptedAnswers:sanitiseA(b.acceptedAnswers??b.a??[]),
+    type:b.type??b.t??'',
+    explanation:b.explanation??b.e??''
+  }));
+  nb.forEach(b=>{
+    if(!b.acceptedAnswers.includes(b.primaryAnswer.toLowerCase())) b.acceptedAnswers.unshift(b.primaryAnswer.toLowerCase());
+  });
   let correct=0; const results=[];
-  for (let i=1;i<=15;i++) {
-    const inp=document.getElementById(`b${i}`), hint=document.getElementById(`h${i}`);
-    const blank=quizData.blanks[i-1];
-    const userAns=norm(inp.value);
-    const accepted=blank.acceptedAnswers.map(norm);
-    const isCorrect=accepted.includes(userAns);
+  for(let i=1;i<=15;i++){
+    const inp=document.getElementById(`b${i}`),hint=document.getElementById(`h${i}`);
+    const b=nb[i-1];
+    const ua=norm(inp.value);
+    const isC=b.acceptedAnswers.map(norm).includes(ua);
     inp.disabled=true;
-    results.push({i,blank,userAns:inp.value.trim(),isCorrect});
-    if (isCorrect) { inp.classList.add('correct'); hint.textContent='&#x2713;'; hint.className='answer-hint correct'; correct++; }
-    else { inp.classList.add('wrong'); hint.textContent=blank.primaryAnswer; hint.className='answer-hint wrong'; }
+    results.push({i,b,ua:inp.value.trim(),isC});
+    if(isC){inp.classList.add('correct');hint.textContent='✓';hint.className='blank-hint correct';correct++;}
+    else{inp.classList.add('wrong');hint.textContent=b.primaryAnswer;hint.className='blank-hint wrong';}
   }
-  await recordScore(currentPlayer, correct);
-  const pct=Math.round(correct/15*100);
-  const grade=pct>=87?`&#x1F31F; Excellent, ${currentPlayer}!`:pct>=67?`&#x1F44D; Good effort, ${currentPlayer}!`:`&#x1F4AA; Keep practising, ${currentPlayer}!`;
-  const al=pct>=87?'AL1-AL2 range':pct>=67?'AL2-AL3 range':pct>=47?'AL3-AL4 range':'AL4+ — more practice needed';
-  const wrongList=results.filter(r=>!r.isCorrect).map(r=>r.i);
-  document.getElementById('score-area').innerHTML=`
-    <div class="score-card sc-${currentPlayer}">
-      <div class="score-big sb-${currentPlayer}">${correct}<span style="font-size:1.1rem;color:var(--muted)">/15</span></div>
-      <div class="score-detail"><strong>${grade}</strong><br>
-        ${correct}/15 (${pct}%) &middot; <em>${al}</em><br>
-        ${wrongList.length>0?`Incorrect: blanks <strong>${wrongList.join(', ')}</strong>`:'&#x1F389; All correct!'}
-      </div>
-    </div>`;
+  await recordScore(currentPlayer,currentComp,correct,15);
+  showScoreCard(correct,15);
   document.getElementById('submit-btn').style.display='none';
-  if (wrongList.length>0) document.getElementById('reveal-btn').style.display='inline-block';
+  const wrong=results.filter(r=>!r.isC);
+  if(wrong.length>0) document.getElementById('reveal-btn').style.display='inline-block';
   const rows=results.map(r=>{
-    const multi=r.blank.acceptedAnswers.length>1;
-    return `<tr class="${r.isCorrect?'correct-row':'wrong-row'}">
+    const multi=r.b.acceptedAnswers.length>1;
+    return `<tr class="${r.isC?'rr-correct':'rr-wrong'}">
       <td><strong>${r.i}</strong></td>
-      <td>${r.isCorrect
-        ?`<span class="tag-correct">&#x2713; Correct</span> <em style="color:var(--accent)">${r.userAns}</em>`
-        :`<span class="tag-wrong">&#x2717; Wrong</span> <em style="color:var(--red);text-decoration:line-through">${r.userAns}</em>`}</td>
-      <td><span class="accepted-list">${r.blank.primaryAnswer}</span>
-        ${multi?`<br><span style="font-size:.75rem;color:var(--muted)">Also: ${r.blank.acceptedAnswers.filter(a=>a!==r.blank.primaryAnswer.toLowerCase()).join(', ')}</span>`:''}
-        <span class="type-badge">${r.blank.type}</span></td>
-      <td style="font-size:.78rem;color:var(--muted)">${r.blank.explanation||''}</td></tr>`;
+      <td>${r.isC?`<span class="tag-c">✓</span> <em style="color:var(--accent)">${r.ua}</em>`:`<span class="tag-w">✗</span> <em style="color:var(--red);text-decoration:line-through">${r.ua}</em>`}</td>
+      <td><span class="accepted-ans">${r.b.primaryAnswer}</span>${multi?`<br><span style="font-size:.72rem;color:var(--muted)">Also: ${r.b.acceptedAnswers.filter(a=>a!==r.b.primaryAnswer.toLowerCase()).join(', ')}</span>`:''} <span style="font-size:.62rem;background:#f1f5f9;padding:1px 5px;border-radius:3px;color:#475569">${r.b.type}</span></td>
+      <td style="font-size:.75rem;color:var(--muted)">${r.b.explanation}</td></tr>`;
   }).join('');
-  document.getElementById('review-area').innerHTML=`
-    <div style="margin-top:20px">
-      <div class="card-title" style="margin-bottom:12px">&#x1F4CB; Answer Review</div>
-      <div style="overflow-x:auto">
-        <table class="review-table">
-          <thead><tr><th>#</th><th>Your Answer</th><th>Accepted</th><th>Why</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-    </div>`;
+  document.getElementById('review-area').innerHTML=`<div style="margin-top:14px"><div class="card-title" style="margin-bottom:10px">📋 Answer Review</div><div class="review-wrap"><table class="review-table"><thead><tr><th>#</th><th>Your Answer</th><th>Accepted</th><th>Why</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
   document.getElementById('score-area').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
-
-function revealAll() {
-  for (let i=1;i<=15;i++) {
-    const inp=document.getElementById(`b${i}`), hint=document.getElementById(`h${i}`);
-    if (inp&&inp.classList.contains('wrong')) {
-      inp.classList.replace('wrong','revealed'); inp.value=quizData.blanks[i-1].primaryAnswer;
-      if(hint){hint.textContent='';hint.className='answer-hint';}
+function revealComprehension(){
+  const blanks=quizData.blanks||[];
+  const nb=blanks.map((b,idx)=>({number:b.number??b.n??(idx+1),primaryAnswer:b.primaryAnswer??b.p??''}));
+  for(let i=1;i<=15;i++){
+    const inp=document.getElementById(`b${i}`),hint=document.getElementById(`h${i}`);
+    if(inp&&inp.classList.contains('wrong')){
+      inp.classList.replace('wrong','revealed');inp.value=nb[i-1].primaryAnswer;
+      if(hint){hint.textContent='';hint.className='blank-hint';}
     }
   }
   document.getElementById('reveal-btn').style.display='none';
 }
-
-function resetQuiz() {
-  submitted=false;
-  for(let i=1;i<=15;i++){
-    const inp=document.getElementById(`b${i}`),hint=document.getElementById(`h${i}`);
-    if(inp){inp.value='';inp.disabled=false;inp.className='blank-input';}
-    if(hint){hint.textContent='';hint.className='answer-hint';}
-  }
-  ['score-area','review-area'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='';});
-  const sb=document.getElementById('submit-btn');if(sb)sb.style.display='inline-block';
-  const rb=document.getElementById('reveal-btn');if(rb)rb.style.display='none';
-  document.getElementById('status-msg').textContent='';
-  const f=document.getElementById('b1');if(f)f.focus();
+function renderSynthesis(area, metaHtml) {
+  const qs=quizData.questions||[];
+  let html=metaHtml+`<p style="font-size:.82rem;color:var(--muted);margin-bottom:14px;font-style:italic;font-family:'Lora',serif">Complete each sentence according to the instruction. 2 marks each.</p>`;
+  qs.forEach((q,qi)=>{
+    const sentences=(q.sentences||[]).map(s=>`<div class="st-sentence">${s}</div>`).join('');
+    html+=`<div class="st-block" id="stb${qi}">
+      <div class="q-label">Question ${q.n} <span style="font-size:.6rem;background:#f1f5f9;padding:1px 5px;border-radius:3px;color:#475569">${q.type||''}</span></div>
+      <div class="st-sentences">${sentences}</div>
+      <div class="st-instruction">📌 Instruction: <strong>${q.instruction||''}</strong></div>
+      ${q.stem?`<div class="st-stem">${q.stem} <span style="border-bottom:1.5px solid var(--border);display:inline-block;width:200px;vertical-align:bottom">&nbsp;</span></div>`:''}
+      <textarea class="st-input" id="st${qi}" placeholder="Type your answer here…" rows="2"></textarea>
+      <div class="st-feedback" id="stf${qi}">
+        <span id="stf-result${qi}"></span>
+        <div style="margin-top:6px">✅ <span class="st-answer" id="stf-ans${qi}"></span></div>
+        <div id="stf-alt${qi}" class="st-alt"></div>
+        <div style="margin-top:4px;font-size:.78rem;color:var(--muted)" id="stf-exp${qi}"></div>
+      </div>
+    </div>`;
+  });
+  html+=`<div id="score-area"></div>
+  <div class="quiz-actions">
+    <button class="btn-primary" id="submit-btn" onclick="submitSynthesis()">Check Answers</button>
+    <button class="btn-secondary" onclick="resetQuizUI()">Clear</button>
+  </div><div id="status-msg"></div>`;
+  area.innerHTML=html;
 }
-</script>
+async function submitSynthesis(){
+  if(submitted) return;
+  const qs=quizData.questions||[];
+  for(let qi=0;qi<qs.length;qi++){
+    if(!document.getElementById(`st${qi}`).value.trim()){
+      document.getElementById('status-msg').textContent='Please answer all questions first.'; return;
+    }
+  }
+  document.getElementById('status-msg').textContent='';
+  submitted=true;
+  let correct=0;
+  qs.forEach((q,qi)=>{
+    const ua=document.getElementById(`st${qi}`).value.trim();
+    const inp=document.getElementById(`st${qi}`);
+    const ca=(q.answer||'').trim();
+    const alts=[ca,...(q.alternatives||[])].map(a=>a.toLowerCase().replace(/\s+/g,' ').trim());
+    const ua_norm=ua.toLowerCase().replace(/\s+/g,' ').trim();
+    const isC=alts.some(a=>ua_norm===a||ua_norm===a.replace(/[.,!?]/g,'')||ua_norm.replace(/[.,!?]/g,'')=== a.replace(/[.,!?]/g,''));
+    inp.disabled=true;
+    inp.classList.add(isC?'correct':'wrong');
+    if(isC) correct+=2; 
+    const fb=document.getElementById(`stf${qi}`);
+    fb.classList.add('show');
+    document.getElementById(`stf-result${qi}`).innerHTML=isC?'<span style="color:var(--accent);font-weight:700">✓ Correct! (+2 marks)</span>':'<span style="color:var(--red);font-weight:700">✗ Not quite. Suggested answer:</span>';
+    document.getElementById(`stf-ans${qi}`).textContent=(q.stem||'')+' '+ca;
+    if((q.alternatives||[]).length>0) document.getElementById(`stf-alt${qi}`).textContent='Also accepted: '+q.alternatives.join('; ');
+    document.getElementById(`stf-exp${qi}`).textContent=q.explanation||'';
+  });
+  const correctQs=Math.round(correct/2);
+  await recordScore(currentPlayer,currentComp,correctQs,5);
+  showScoreCard(correctQs,5,`${correct}/10 marks`);
+  document.getElementById('submit-btn').style.display='none';
+}
+function showScoreCard(correct, total, extraLabel) {
+  const pct=Math.round(correct/total*100);
+  const grade=pct>=87?`🌟 Excellent, ${currentPlayer}!`:pct>=67?`👍 Good effort, ${currentPlayer}!`:`💪 Keep practising, ${currentPlayer}!`;
+  const al=pct>=87?'AL1–AL2 range':pct>=67?'AL2–AL3 range':pct>=47?'AL3–AL4 range':'AL4+';
+  const sa=document.getElementById('score-area');
+  if(sa) sa.innerHTML=`<div class="score-card sc-${currentPlayer}">
+    <div class="score-big sb-${currentPlayer}">${correct}<span style="font-size:1rem;color:var(--muted)">/${total}</span></div>
+    <div class="score-detail"><strong>${grade}</strong><br>${extraLabel||`${correct}/${total} (${pct}%)`} · <em>${al}</em></div>
+  </div>`;
+}
+function resetQuizUI(){
+  submitted=false;
+  quizData=null;
+  document.getElementById('quiz-area').innerHTML='';
+}
+window.addEventListener('DOMContentLoaded', ()=>initApp());</script>
 </body>
 </html>
