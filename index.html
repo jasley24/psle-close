@@ -504,6 +504,7 @@ async function generateQuiz() {
   try {
     const apiKey = getApiKey();
     if (!apiKey) { showApiSetup(); return; }
+
     const resp = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -518,14 +519,26 @@ async function generateQuiz() {
         messages: [{role:"user", content: buildPrompt(selectedTopic)}]
       })
     });
-    const data = await resp.json();
-    if (resp.status === 401) {
-      clearApiKey();
-      throw new Error("Invalid API key — please re-enter it.");
+
+    let data;
+    try { data = await resp.json(); } catch(e) {
+      throw new Error(`Server returned non-JSON response (status ${resp.status}). Check your API key.`);
     }
+
+    if (resp.status === 401) { clearApiKey(); throw new Error("Invalid API key — please re-enter it."); }
+    if (resp.status === 403) throw new Error("API key doesn't have permission. Check console.anthropic.com.");
+    if (resp.status === 429) throw new Error("Too many requests — wait a moment and try again.");
+    if (resp.status === 500) throw new Error("Anthropic server error — try again in a moment.");
+    if (!resp.ok) throw new Error(`API error ${resp.status}: ${data?.error?.message || 'Unknown error'}`);
+    if (!data.content || !Array.isArray(data.content)) throw new Error(`Unexpected API response format. Raw: ${JSON.stringify(data).slice(0,200)}`);
+
     const raw = data.content.map(i=>i.text||'').join('').trim();
     const clean = raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
-    const parsed = JSON.parse(clean);
+
+    let parsed;
+    try { parsed = JSON.parse(clean); } catch(e) {
+      throw new Error(`AI returned malformed JSON. Try again. (${e.message})`);
+    }
 
     if (!parsed.passage || !Array.isArray(parsed.blanks) || parsed.blanks.length !== 15)
       throw new Error("Invalid quiz structure — expected 15 blanks");
