@@ -633,7 +633,7 @@ function renderMCQ(area, metaHtml) {
     <button class="btn-primary" id="submit-btn" onclick="submitMCQ()">Check Answers</button>
     <button class="btn-secondary" onclick="resetQuizUI()">Clear</button>
   </div>
-  <div id="status-msg"></div>`;
+  <div id="status-msg"></div><div id="review-area"></div>`;
   area.innerHTML=html;
 }
 function selectMCQ(qi, oi) {
@@ -669,6 +669,22 @@ async function submitMCQ() {
   await recordScore(currentPlayer,currentComp,correct,total);
   showScoreCard(correct,total);
   document.getElementById('submit-btn').style.display='none';
+  // Explanation table
+  const rows=qs.map((q,qi)=>{
+    const sel=document.querySelector(`#opts${qi} .option-btn.selected`);
+    const selOi=sel?parseInt(sel.dataset.oi):-1;
+    const isC=selOi===q.answer;
+    const opts=q.options.map(o=>o.replace(/^[A-D][.)\s]+/,''));
+    return `<tr class="${isC?'rr-correct':'rr-wrong'}">
+      <td><strong>${q.n}</strong></td>
+      <td style="font-family:'Lora',serif;font-size:.88rem">${q.sentence.replace('___','<u>___</u>')}</td>
+      <td>${isC?`<span class="tag-c">✓</span> <em style="color:var(--accent)">${opts[selOi]||''}</em>`:`<span class="tag-w">✗</span> <em style="color:var(--red);text-decoration:line-through">${opts[selOi]||''}</em>`}</td>
+      <td><span class="accepted-ans">${opts[q.answer]}</span> <span style="font-size:.62rem;background:#f1f5f9;padding:1px 5px;border-radius:3px;color:#475569">${q.type||''}</span></td>
+      <td style="font-size:.75rem;color:var(--muted)">${q.explanation||''}</td>
+    </tr>`;
+  }).join('');
+  const ra=document.getElementById('review-area');
+  if(ra) ra.innerHTML=`<div style="margin-top:14px"><div class="card-title" style="margin-bottom:10px">📋 Answer Review</div><div class="review-wrap"><table class="review-table"><thead><tr><th>#</th><th>Question</th><th>Your Answer</th><th>Correct Answer</th><th>Explanation</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
 }
 function renderVocabCloze(area, metaHtml) {
   const passage=quizData.passage||'';
@@ -697,7 +713,7 @@ function renderVocabCloze(area, metaHtml) {
   <div class="quiz-actions">
     <button class="btn-primary" id="submit-btn" onclick="submitMCQ()">Check Answers</button>
     <button class="btn-secondary" onclick="resetQuizUI()">Clear</button>
-  </div><div id="status-msg"></div>`;
+  </div><div id="status-msg"></div><div id="review-area"></div>`;
   area.innerHTML=html;
 }
 function renderGrammarCloze(area, metaHtml) {
@@ -718,7 +734,7 @@ function renderGrammarCloze(area, metaHtml) {
     <button class="btn-primary" id="submit-btn" onclick="submitGrammarCloze()">Check Answers</button>
     <button class="btn-warn" id="reveal-btn" onclick="revealGrammarCloze()" style="display:none">Reveal All</button>
     <button class="btn-secondary" onclick="resetQuizUI()">Clear</button>
-  </div><div id="status-msg"></div>`;
+  </div><div id="status-msg"></div><div id="review-area"></div>`;
   area.innerHTML=html;
   let lastFocused=null;
   for(let i=1;i<=10;i++){
@@ -759,6 +775,21 @@ async function submitGrammarCloze() {
   showScoreCard(correct,10);
   document.getElementById('submit-btn').style.display='none';
   if(wrong.length>0) document.getElementById('reveal-btn').style.display='inline-block';
+  const gcAnswers=quizData.answers||[];
+  const gcTypes=quizData.types||[];
+  const gcExps=quizData.explanations||[];
+  const gcRows=gcAnswers.map((ca,i)=>{
+    const inp=document.getElementById(`gc${i+1}`);
+    const ua=(inp?inp.value.trim():'').toLowerCase();
+    const isC=ua===ca.toLowerCase();
+    return `<tr class="${isC?'rr-correct':'rr-wrong'}">
+      <td><strong>${i+1}</strong></td>
+      <td>${isC?`<span class="tag-c">✓</span> <em style="color:var(--accent)">${ua}</em>`:`<span class="tag-w">✗</span> <em style="color:var(--red);text-decoration:line-through">${ua}</em>`}</td>
+      <td><span class="accepted-ans">${ca}</span> <span style="font-size:.62rem;background:#f1f5f9;padding:1px 5px;border-radius:3px;color:#475569">${gcTypes[i]||''}</span></td>
+      <td style="font-size:.75rem;color:var(--muted)">${gcExps[i]||''}</td></tr>`;
+  }).join('');
+  const gcRa=document.getElementById('review-area');
+  if(gcRa) gcRa.innerHTML=`<div style="margin-top:14px"><div class="card-title" style="margin-bottom:10px">📋 Answer Review</div><div class="review-wrap"><table class="review-table"><thead><tr><th>#</th><th>Your Answer</th><th>Correct Answer</th><th>Explanation</th></tr></thead><tbody>${gcRows}</tbody></table></div></div>`;
 }
 function revealGrammarCloze(){
   const answers=quizData.answers||[];
@@ -774,14 +805,13 @@ function revealGrammarCloze(){
 function renderEditing(area, metaHtml) {
   const words=quizData.words||[];
   let passage=quizData.passage||'';
+  // Use regex to robustly find (N)word or (N) word in all variations
   words.forEach((w,i)=>{
-    passage=passage.replace(`(${i+1})${w}`,
-      `<span class="underlined-word"><span class="uw-num">${i+1}</span><span class="uw-text">${w}</span></span>`
-    );
-    // Also try without space after bracket
-    passage=passage.replace(`(${i+1}) ${w}`,
-      `<span class="underlined-word"><span class="uw-num">${i+1}</span><span class="uw-text">${w}</span></span>`
-    );
+    const n = i+1;
+    const escaped = w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const re = new RegExp('\\('+n+'\\)\\s*'+escaped,'g');
+    const replacement = `<span class="underlined-word"><span class="uw-num">${n}</span><span class="uw-text">${w}</span></span>`;
+    passage = passage.replace(re, replacement);
   });
   const paras=passage.replace(/\r\n/g,'\n').split(/\n{2,}/).map(p=>p.replace(/\n/g,' ').trim()).filter(p=>p).map(p=>`<p>${p}</p>`).join('');
   let rowsHtml='';
@@ -801,7 +831,7 @@ function renderEditing(area, metaHtml) {
     <button class="btn-primary" id="submit-btn" onclick="submitEditing()">Check Answers</button>
     <button class="btn-warn" id="reveal-btn" onclick="revealEditing()" style="display:none">Show Answers</button>
     <button class="btn-secondary" onclick="resetQuizUI()">Clear</button>
-  </div><div id="status-msg"></div>`;
+  </div><div id="status-msg"></div><div id="review-area"></div>`;
   area.innerHTML=html;
   for(let i=0;i<words.length;i++){
     document.getElementById(`ei${i}`).addEventListener('keydown',e=>{
@@ -840,6 +870,29 @@ async function submitEditing(){
   showScoreCard(correct,words.length);
   document.getElementById('submit-btn').style.display='none';
   if(wrong.length>0) document.getElementById('reveal-btn').style.display='inline-block';
+  // Explanation table
+  const types=quizData.types||[];
+  const exps=quizData.explanations||[];
+  const rows=words.map((w,i)=>{
+    const ua=document.getElementById(`ei${i}`).value.trim();
+    const ca=answers[i]||'';
+    const uaN=ua.toLowerCase().replace(/[^a-z]/g,'');
+    const caN=ca.toLowerCase().replace(/[^a-z]/g,'');
+    const wN=w.toLowerCase().replace(/[^a-z]/g,'');
+    const isC=uaN===caN||(caN==='correct'&&(uaN==='correct'||uaN===wN));
+    const errorType=types[i]||'';
+    const exp=exps[i]||'';
+    return `<tr class="${isC?'rr-correct':'rr-wrong'}">
+      <td><strong>${i+1}</strong></td>
+      <td><em>${w}</em></td>
+      <td>${isC?`<span class="tag-c">✓</span> <em style="color:var(--accent)">${ua}</em>`:`<span class="tag-w">✗</span> <em style="color:var(--red);text-decoration:line-through">${ua}</em>`}</td>
+      <td><span class="accepted-ans">${ca==='correct'?'<span style="color:var(--muted);font-style:italic">No change</span>':ca}</span></td>
+      <td><span style="font-size:.62rem;background:#f1f5f9;padding:1px 5px;border-radius:3px;color:#475569">${errorType}</span></td>
+      <td style="font-size:.75rem;color:var(--muted)">${exp}</td>
+    </tr>`;
+  }).join('');
+  const ra=document.getElementById('review-area');
+  if(ra) ra.innerHTML=`<div style="margin-top:14px"><div class="card-title" style="margin-bottom:10px">📋 Answer Review</div><div class="review-wrap"><table class="review-table"><thead><tr><th>#</th><th>Word</th><th>Your Answer</th><th>Correct Answer</th><th>Error Type</th><th>Explanation</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
 }
 function revealEditing(){
   const answers=quizData.answers||[];
@@ -1013,6 +1066,23 @@ async function submitSynthesis(){
   await recordScore(currentPlayer,currentComp,correctQs,5);
   showScoreCard(correctQs,5,`${correct}/10 marks`);
   document.getElementById('submit-btn').style.display='none';
+  // Explanation table
+  const stRows=qs.map((q,qi)=>{
+    const ua=document.getElementById(`st${qi}`).value.trim();
+    const ca=(q.answer||'').trim();
+    const alts=[ca,...(q.alternatives||[])].map(a=>a.toLowerCase().replace(/\s+/g,' ').trim());
+    const uaN=ua.toLowerCase().replace(/\s+/g,' ').trim();
+    const isC=alts.some(a=>uaN===a||uaN.replace(/[.,!?]/g,'')===a.replace(/[.,!?]/g,''));
+    return `<tr class="${isC?'rr-correct':'rr-wrong'}">
+      <td><strong>${q.n}</strong></td>
+      <td style="font-size:.78rem">${(q.sentences||[]).join(' ')}</td>
+      <td>${isC?`<span class="tag-c">✓</span> <em style="color:var(--accent);font-size:.83rem">${ua}</em>`:`<span class="tag-w">✗</span> <em style="color:var(--red);text-decoration:line-through;font-size:.83rem">${ua}</em>`}</td>
+      <td><span class="accepted-ans" style="font-size:.83rem">${(q.stem||'')} ${ca}</span>${(q.alternatives||[]).length?`<br><span style="font-size:.72rem;color:var(--muted)">Also: ${q.alternatives.join('; ')}</span>`:''}</td>
+      <td style="font-size:.75rem;color:var(--muted)">${q.explanation||''}</td>
+    </tr>`;
+  }).join('');
+  const ra=document.getElementById('review-area');
+  if(ra) ra.innerHTML=`<div style="margin-top:14px"><div class="card-title" style="margin-bottom:10px">📋 Answer Review</div><div class="review-wrap"><table class="review-table"><thead><tr><th>#</th><th>Original</th><th>Your Answer</th><th>Correct Answer</th><th>Explanation</th></tr></thead><tbody>${stRows}</tbody></table></div></div>`;
 }
 function showScoreCard(correct, total, extraLabel) {
   const pct=Math.round(correct/total*100);
