@@ -360,6 +360,9 @@ async function recordScore(player, compId, correct, total) {
   if (!s[player]) s[player]=emptyScores()[player];
   s[player].quizzes++;
   s[player].total+=correct;
+  s[player].possible=(s[player].possible||0)+total;
+  const pct=Math.round(correct/total*100);
+  if (pct>(s[player].bestPct||0)) s[player].bestPct=pct;
   if (correct>s[player].best) s[player].best=correct;
   if (!s[player].byComp) s[player].byComp={};
   if (!s[player].byComp[compId]) s[player].byComp[compId]={quizzes:0,total:0};
@@ -382,8 +385,10 @@ function renderLeaderboard(scores) {
   });
   const ranked=PLAYERS.map(p=>{
     const d=scores[p]||{quizzes:0,total:0,best:0};
-    return {...d,name:p,avg:d.quizzes>0?d.total/d.quizzes:0};
-  }).sort((a,b)=>b.avg-a.avg||b.quizzes-a.quizzes);
+    const possible=d.possible||(d.quizzes*10);
+    const avgPct=d.quizzes>0&&possible>0?Math.round(d.total/possible*100):0;
+    return {...d,name:p,avgPct,bestPct:d.bestPct||0};
+  }).sort((a,b)=>b.avgPct-a.avgPct||b.quizzes-a.quizzes);
   const cont=document.getElementById('lb-rows');
   if (!cont) return;
   if (ranked.every(r=>r.quizzes===0)) {
@@ -391,14 +396,12 @@ function renderLeaderboard(scores) {
     return;
   }
   cont.innerHTML=ranked.map((r,i)=>{
-    const bw=Math.round((r.avg/(r.quizzes>0?Math.max(...ranked.map(x=>x.avg),1):1))*100);
-    const avg=r.quizzes>0?r.avg.toFixed(1):'—';
     return `<div class="lb-row r-${r.name}">
       <span class="lb-rank">${r.quizzes>0?MEDALS[i]:'—'}</span>
       <span class="lb-av">${AVATARS[r.name]}</span>
       <span class="lb-name c-${r.name}">${r.name}</span>
-      <div class="lb-bar-wrap"><div class="lb-bar b-${r.name}" style="width:${bw}%"></div></div>
-      <div class="lb-stats">Avg <strong>${avg}</strong><br>${r.best} best · ${r.quizzes} played</div>
+      <div class="lb-bar-wrap"><div class="lb-bar b-${r.name}" style="width:${r.avgPct}%"></div></div>
+      <div class="lb-stats">Avg <strong>${r.quizzes>0?r.avgPct+'%':'—'}</strong><br>Best ${r.bestPct}% · ${r.quizzes} played</div>
     </div>`;
   }).join('');
 }
@@ -624,24 +627,23 @@ async function generateQuiz() {
   try {
     const apiKey=getApiKey();
     if (!apiKey){ resetApiKey(); return; }
-    const genCtrl=new AbortController();
-    const genTimeout=setTimeout(()=>genCtrl.abort(),60000);
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key':apiKey,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body:JSON.stringify({
-        model:'claude-haiku-4-5-20251001',
-        max_tokens:3500,
-        messages:[{role:'user',content:buildPrompt(currentComp,selectedTopic)}]
+    const resp=await Promise.race([
+      fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'x-api-key':apiKey,
+          'anthropic-version':'2023-06-01',
+          'anthropic-dangerous-direct-browser-access':'true'
+        },
+        body:JSON.stringify({
+          model:'claude-haiku-4-5-20251001',
+          max_tokens:3500,
+          messages:[{role:'user',content:buildPrompt(currentComp,selectedTopic)}]
+        })
       }),
-      signal:genCtrl.signal
-    });
-    clearTimeout(genTimeout);
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('Request timed out after 60 seconds. Please try again.')),60000))
+    ]);
     let data;
     try{ data=await resp.json(); }catch(e){ throw new Error(`Non-JSON response (${resp.status}). Check API key.`); }
     if(resp.status===401){ resetApiKey(); throw new Error('Invalid API key.'); }
@@ -698,7 +700,7 @@ async function generateQuiz() {
     quizData=parsed;
     renderQuiz();
   } catch(err){
-    const msg=err.name==='AbortError'?'Request timed out after 60 seconds. Please try again.':err.message;
+    const msg=err.message||'Something went wrong. Please try again.';
     area.innerHTML=`<div class="error-state">⚠️ ${msg}</div><div class="gen-bar"><button class="btn-secondary" onclick="generateQuiz()">Try Again</button></div>`;
   } finally {
     genBtn.disabled=false;
@@ -1236,15 +1238,14 @@ async function submitSynthesis(){
     const apiKey=getApiKey();
     const markPrompt=`You are a Singapore PSLE English Paper 2 marker for Synthesis and Transformation. Mark these 5 student answers. For each: the student was given the original sentence(s), an instruction, and a stem to complete. Judge if the student answer is grammatically correct AND preserves the original meaning AND follows the instruction. Accept valid alternative phrasings. If the student typed the full sentence including the stem, that is acceptable - judge the complete sentence. Be fair but maintain PSLE standards: grammar, spelling and punctuation must be correct for full marks. Award 2, 1, or 0 marks each: 2=fully correct, 1=correct meaning but one minor grammar or spelling slip, 0=wrong meaning or major errors. Questions: ${JSON.stringify(markingPayload)} Return ONLY this JSON no markdown: {"results":[{"n":1,"marks":2,"verdict":"Correct","feedback":"Brief specific feedback max 20 words"}]} All 5 results required.`;
 
-    const ctrl=new AbortController();
-    const timeout=setTimeout(()=>ctrl.abort(),60000);
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1500,messages:[{role:'user',content:markPrompt}]}),
-      signal:ctrl.signal
-    });
-    clearTimeout(timeout);
+    const resp=await Promise.race([
+      fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1500,messages:[{role:'user',content:markPrompt}]})
+      }),
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('marking timeout')),60000))
+    ]);
     const data=await resp.json();
     if(resp.ok&&data.content){
       const raw=data.content.map(i=>i.text||'').join('').trim();
@@ -1326,9 +1327,12 @@ function showScoreCard(correct, total, extraLabel) {
 }
 function resetQuizUI(){
   submitted=false;
-  quizData=null;
   stopQuizTimer();
-  document.getElementById('quiz-area').innerHTML='';
+  if(quizData){
+    renderQuiz();
+  } else {
+    document.getElementById('quiz-area').innerHTML='';
+  }
 }
 window.addEventListener('DOMContentLoaded', ()=>{
   try {
